@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<array>
+	<dict>
+		<key>title</key>
+		<string>工大新闻</string>
+		<key>icon</key>
+		<string>news</string>
+	</dict>
+	<dict>
+		<key>title</key>
+		<string>公告通知</string>
+		<key>icon</key>
+		<string>notice</string>
+	</dict>
+	<dict>
+		<key>title</key>
+		<string>学生信息</string>
+		<key>icon</key>
+		<string>info</string>
+	</dict>
+	<dict>
+		<key>title</key>
+		<string>课程表</string>
+		<key>icon</key>
+		<string>schedule</string>
+	</dict>
+	<dict>
+		<key>title</key>
+		<string>成绩表</string>
+		<key>icon</key>
+		<string>reportcard</string>
+	</dict>
+	<dict>
+		<key>title</key>
+		<string>图书借阅</string>
+		<key>icon</key>
+		<string>bookborrow</string>
+	</dict>
+	<dict>
+		<key>title</key>
+		<string>一卡通</string>
+		<key>icon</key>
+		<string>onecard</string>
+	</dict>
+	<dict>
+		<key>title</key>
+		<string>设置</string>
+		<key>icon</key>
+		<string>set</string>
+	</dict>
+</array>
+</plist>
