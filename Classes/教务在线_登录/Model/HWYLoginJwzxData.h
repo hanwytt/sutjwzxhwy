@@ -13,7 +13,7 @@
 @property (assign, nonatomic) BOOL success;
 @property (copy, nonatomic) NSString *content;
 
-+ (HWYLoginJwzxData *)getLoginJwzxDataFromHtml:(NSString *)responseString and:(id)responseObject;
++ (HWYLoginJwzxData *)getLoginJwzxDataFromHtml:(id)responseObject;
 + (void)saveLoginJwzxData:(NSString *)name password:(NSString *)password;
 + (NSString *)getLoginJwzxPassword:(NSString *)name;
 

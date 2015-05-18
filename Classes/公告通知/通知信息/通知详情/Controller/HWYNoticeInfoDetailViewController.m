@@ -8,7 +8,7 @@
 
 #import "HWYNoticeInfoDetailViewController.h"
 #import "HWYNetworking.h"
-#import "HWYGeneralConfig.h"
+#import "HWYAppDefine.h"
 #import "HWYAppDelegate.h"
 #import "MBProgressHUD.h"
 
@@ -48,7 +48,7 @@
 - (void)initNoticeInfoDetail {
     _noticeInfoDetail = [HWYNoticeInfoDetailData getNoticeInfoDetailData:_resourceid];
     NSString *htmlString = [NSString string];
-    if (kStringExist(_noticeInfoDetail.CONTENT)) {
+    if (KStringExist(_noticeInfoDetail.CONTENT)) {
         htmlString = [self getHtmlString];
         [_webView loadHTMLString:htmlString baseURL:nil];
     } else {
@@ -72,7 +72,7 @@
     hud.removeFromSuperViewOnHide = YES;
     [self.view addSubview:hud];
     [hud show:YES];
-    if ([userDefaults boolForKey:_K_MODE_OFFLINE]) {
+    if ([KUserDefaults boolForKey:KModeOffline]) {
         NSLog(@"新闻详情-离线模式");
         [self performSelector:@selector(initNoticeInfoDetail) withObject:nil afterDelay:0.5];
         [hud hide:YES afterDelay:0.5];
@@ -104,10 +104,10 @@
     [htmlString appendString:@"</head>"];
     [htmlString appendString:@"<body>"];
     [htmlString appendFormat:@"<p align=\"center\"><strong>%@</strong></p>", _noticeInfoDetail.TITLE];
-    if (!kStringExist(_noticeInfoDetail.UNIT_NAME)) {
+    if (!KStringExist(_noticeInfoDetail.UNIT_NAME)) {
         _noticeInfoDetail.UNIT_NAME = @"";
     }
-    if (!kStringExist(_noticeInfoDetail.USER_NAME)) {
+    if (!KStringExist(_noticeInfoDetail.USER_NAME)) {
         _noticeInfoDetail.USER_NAME = @"";
     }
     [htmlString appendFormat:@"<p align=\"center\" class=\"text-content\"><strong>%@&nbsp;&nbsp;%@&nbsp;&nbsp;%@</strong></p>", _noticeInfoDetail.AUDIT_TIME, _noticeInfoDetail.UNIT_NAME, _noticeInfoDetail.USER_NAME];

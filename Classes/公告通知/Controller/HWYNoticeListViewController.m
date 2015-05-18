@@ -9,7 +9,7 @@
 #import "HWYNoticeListViewController.h"
 #import "HWYNoticeInfoViewController.h"
 #import "HWYNoticeListData.h"
-#import "HWYGeneralConfig.h"
+#import "HWYAppDefine.h"
 #import "HWYNetworking.h"
 #import "MBProgressHUD.h"
 #import "HWYAppDelegate.h"
@@ -76,7 +76,7 @@
     hud.removeFromSuperViewOnHide = YES;
     [self.view addSubview:hud];
     [hud show:YES];
-    if ([userDefaults boolForKey:_K_MODE_OFFLINE]) {
+    if ([KUserDefaults boolForKey:KModeOffline]) {
         NSLog(@"通知列表-离线模式");
         [self performSelector:@selector(initNoticeList) withObject:nil afterDelay:0.5];
         [hud hide:YES afterDelay:0.5];
@@ -101,7 +101,7 @@
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    if (!kArrayEmpty(_noticeListArr)) {
+    if (!KArrayEmpty(_noticeListArr)) {
         return _noticeListArr.count + 1;
     }
     return 0;
@@ -116,7 +116,7 @@
     cell.separatorInset = UIEdgeInsetsZero;
     cell.layoutMargins = UIEdgeInsetsZero;
     UIView *selectView = [[UIView alloc] initWithFrame:cell.frame];
-    selectView.backgroundColor = _K_CELL_SELECTED_COLOR;
+    selectView.backgroundColor = KCellSelectedColor;
     cell.selectedBackgroundView = selectView;
     cell.textLabel.font = [UIFont systemFontOfSize:17.0];
     if (indexPath.row == 0) {
@@ -128,7 +128,7 @@
     if (indexPath.row%2 == 0) {
         cell.backgroundColor = [UIColor whiteColor];
     } else {
-        cell.backgroundColor = kColor(251, 251, 251);
+        cell.backgroundColor = KColor(251, 251, 251);
     }
     return cell;
 }
@@ -167,7 +167,7 @@
 
 - (void)refreshView:(UIRefreshControl *)sender {
     sender.attributedTitle = [[NSAttributedString alloc] initWithString:@"刷新中..."];
-    if ([userDefaults boolForKey:_K_MODE_OFFLINE]) {
+    if ([KUserDefaults boolForKey:KModeOffline]) {
         NSLog(@"通知列表-离线模式");
         [self refreshNoticeList];
         

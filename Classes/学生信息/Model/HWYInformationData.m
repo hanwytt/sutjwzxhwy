@@ -8,7 +8,7 @@
 
 #import "HWYInformationData.h"
 #import "HWYAnalysisHtml.h"
-#import "HWYGeneralConfig.h"
+#import "HWYAppDefine.h"
 #import "FMDB.h"
 
 @implementation HWYInformationData
@@ -32,7 +32,7 @@
 }
 
 + (void)saveInformationData:(HWYInformationData *)info {
-    NSString *dbpath = [DocumentsDirectory stringByAppendingPathComponent:_K_DATABASE];
+    NSString *dbpath = [KDocumentsDirectory stringByAppendingPathComponent:KDatabase];
     FMDatabase* db = [FMDatabase databaseWithPath:dbpath];
     if (![db open]) {
         NSLog(@"Could not open db.");
@@ -48,7 +48,7 @@
 }
 
 + (HWYInformationData *)getInformationData:(NSString *)number {
-    NSString *dbpath = [DocumentsDirectory stringByAppendingPathComponent:_K_DATABASE];
+    NSString *dbpath = [KDocumentsDirectory stringByAppendingPathComponent:KDatabase];
     FMDatabase* db = [FMDatabase databaseWithPath:dbpath];
     if (![db open]) {
         NSLog(@"Could not open db.");
@@ -78,7 +78,7 @@
 }
 
 + (void)saveInfoImageData:(NSData *)data number:(NSString *)number {
-    NSString *dbpath = [DocumentsDirectory stringByAppendingPathComponent:_K_DATABASE];
+    NSString *dbpath = [KDocumentsDirectory stringByAppendingPathComponent:KDatabase];
     FMDatabase* db = [FMDatabase databaseWithPath:dbpath];
     if (![db open]) {
         NSLog(@"Could not open db.");
@@ -95,7 +95,7 @@
 }
 
 + (NSData *)getInfoImageData:(NSString *)number {
-    NSString *dbpath = [DocumentsDirectory stringByAppendingPathComponent:_K_DATABASE];
+    NSString *dbpath = [KDocumentsDirectory stringByAppendingPathComponent:KDatabase];
     FMDatabase* db = [FMDatabase databaseWithPath:dbpath];
     if (![db open]) {
         NSLog(@"Could not open db.");

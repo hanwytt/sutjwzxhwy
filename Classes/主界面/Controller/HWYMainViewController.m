@@ -20,7 +20,7 @@
 #import "HWYBookBorrowViewController.h"
 #import "HWYSetViewController.h"
 #import "HWYAppDelegate.h"
-#import "HWYGeneralConfig.h"
+#import "HWYAppDefine.h"
 #import "HWYMenuData.h"
 
 static CGFloat range = P_WIDTH/2 - 70 + P_WIDTH * 0.8 * 0.5;
@@ -168,7 +168,7 @@ static CGFloat range = P_WIDTH/2 - 70 + P_WIDTH * 0.8 * 0.5;
         [_viewController leftItemClick:nil];
         return;
     }
-    if ([userDefaults boolForKey:_K_MODE_OFFLINE]) {
+    if ([KUserDefaults boolForKey:KModeOffline]) {
         if (!(_offLine | _jwzx | _szgd) && _currentRow >=2 && _currentRow <= 6) {
             HWYLoginOffLineViewController *offLine = [[HWYLoginOffLineViewController alloc] init];
             offLine.delegate = self;
@@ -297,7 +297,7 @@ static CGFloat range = P_WIDTH/2 - 70 + P_WIDTH * 0.8 * 0.5;
 }
 
 - (void)loginBtnClick:(UIButton *)sender {
-    if ([userDefaults boolForKey:_K_MODE_OFFLINE]) {
+    if ([KUserDefaults boolForKey:KModeOffline]) {
         if (!_offLine) {
             HWYLoginOffLineViewController *offLine = [[HWYLoginOffLineViewController alloc] init];
             offLine.delegate = self;

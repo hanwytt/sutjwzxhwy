@@ -11,9 +11,10 @@
 #import "HWYReportCardWebViewController.h"
 #import "HWYReportCardData.h"
 #import "HWYNetworking.h"
-#import "HWYGeneralConfig.h"
+#import "HWYAppDefine.h"
 #import "HWYAppDelegate.h"
-#import "MBProgressHUD.h"
+#import "MBProgressHUD+MJ.h"
+#import "MJRefresh.h"
 
 @interface HWYReportCardViewController () <UITableViewDataSource,UITableViewDelegate,UISearchBarDelegate,UISearchDisplayDelegate> {
     NSString *_identify;
@@ -44,16 +45,19 @@
     // Dispose of any resources that can be recreated.
 }
 
+#pragma mark - 初始化navigationBar
 - (void)initNavBar {
     [self configTitleAndLeftItem:@"成绩表"];
-    if (![userDefaults boolForKey:_K_MODE_OFFLINE]) {
+    if (![KUserDefaults boolForKey:KModeOffline]) {
         UIBarButtonItem *rightItem = [[UIBarButtonItem alloc] initWithTitle:@"网页版" style:UIBarButtonItemStylePlain target:self action:@selector(rightItemClick:)];
         rightItem.tintColor = [UIColor whiteColor];
         [self.navigationItem setRightBarButtonItem:rightItem];
     }
 }
 
+#pragma mark - 初始化view
 - (void)initView {
+    //初始化tableView
     _tableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 64, P_WIDTH, P_HEIGHT-64) style:UITableViewStylePlain];
     _tableView.dataSource = self;
     _tableView.delegate = self;
@@ -64,7 +68,14 @@
     _identify = @"rseportCardCell";
     [_tableView registerClass:[HWYReportCardTableViewCell class] forCellReuseIdentifier:_identify];
     [self.view addSubview:_tableView];
-    [self addRefreshControl];
+    
+    __weak typeof(self) weakSelf = self;
+    // 设置回调（一旦进入刷新状态就会调用这个refreshingBlock）
+    [self.tableView addLegendHeaderWithRefreshingBlock:^{
+        [weakSelf refreshTableView];
+    }];
+    // 马上进入刷新状态
+//    [self.tableView.legendHeader beginRefreshing];
 
     _searchBar = [[UISearchBar alloc] init];
     _searchBar.placeholder = @"搜索";
@@ -80,44 +91,42 @@
     _searchDisplay.delegate = self;
 }
 
-- (void)addRefreshControl {
-    _refreshControl = [[UIRefreshControl alloc] init];
-    _refreshControl.attributedTitle = [[NSAttributedString alloc] initWithString:@"下拉刷新"];
-    [_refreshControl addTarget:self action:@selector(refreshView:) forControlEvents:UIControlEventValueChanged];
-    [_tableView addSubview:_refreshControl];
-}
-
+#pragma mark - 从本地数据库加载数据
 - (void)initReportCard {
     _reportCount = [HWYReportCountData getReportCountData];
     _reportCardArr = [HWYReportCardData getReportCardData];
     [_tableView reloadData];
+    [self.tableView.header endRefreshing];
 }
 
+#pragma mark - 获取数据
 - (void)requestNetworking {
-    MBProgressHUD *hud = [[MBProgressHUD alloc] initWithView:self.view];
-    hud.labelFont = [UIFont systemFontOfSize:15.0];
-    hud.mode = MBProgressHUDModeIndeterminate;
-    hud.labelText = @"加载中";
-    hud.removeFromSuperViewOnHide = YES;
-    [self.view addSubview:hud];
-    [hud show:YES];
-    if ([userDefaults boolForKey:_K_MODE_OFFLINE]) {
+    MBProgressHUD *hud = [MBProgressHUD showMessage:@"加载中..." toView:self.view];
+    if ([KUserDefaults boolForKey:KModeOffline]) {
         NSLog(@"成绩表-离线模式");
-        [self performSelector:@selector(initReportCard) withObject:nil afterDelay:0.5];
-        [hud hide:YES afterDelay:0.5];
+        [hud hideHUDDefaultDelay:^{
+            [self initReportCard];
+        }];
     } else {
-        if ([HWYAppDelegate isReachable]) {
-            [HWYNetworking getReportCardData:^(NSError *error) {
-                NSLog(@"成绩表-正常模式");
-                [self initReportCard];
-                [hud hide:YES];
-            }];
-        } else {
-            hud.customView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_error_black"]];
-            hud.mode = MBProgressHUDModeCustomView;
-            hud.labelText = @"当前网络不可用";
-            [hud hide:YES afterDelay:0.5];
-        }
+        NSLog(@"成绩表-正常模式");
+        [HWYNetworking getReportCardData:^(NSError *error) {
+            [self initReportCard];
+            [hud hide:YES];
+        }];
+    }
+}
+
+- (void)refreshTableView {
+    if ([KUserDefaults boolForKey:KModeOffline]) {
+        NSLog(@"成绩表-离线模式");
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.7 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            [self initReportCard];
+        });
+    } else {
+        NSLog(@"成绩表-正常模式");
+        [HWYNetworking getReportCardData:^(NSError *error) {
+            [self initReportCard];
+        }];
     }
 }
 
@@ -149,7 +158,7 @@
     if (indexPath.row%2 == 0) {
         cell.backgroundColor = [UIColor whiteColor];
     } else {
-        cell.backgroundColor = kColor(251, 251, 251);
+        cell.backgroundColor = KColor(251, 251, 251);
     }
     return cell;
 }
@@ -213,7 +222,7 @@ shouldReloadTableForSearchScope:(NSInteger)searchOption
 
 - (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
     if (_tableView == tableView) {
-        if (!kArrayEmpty(_reportCardArr)) {
+        if (!KArrayEmpty(_reportCardArr)) {
             return 48;
         }
         return 0;
@@ -224,9 +233,9 @@ shouldReloadTableForSearchScope:(NSInteger)searchOption
 
 - (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section {
     UIView *headerView = [[UIView alloc] init];
-    headerView.backgroundColor = kColor(251, 251, 251);
+    headerView.backgroundColor = KColor(251, 251, 251);
     headerView.layer.borderWidth = 0.5;
-    headerView.layer.borderColor = [kColor(203, 214, 226) CGColor];
+    headerView.layer.borderColor = [KColor(203, 214, 226) CGColor];
     
     UILabel *bxCountTitle = [[UILabel alloc] initWithFrame:CGRectMake(5, 3, 85, 21)];
     bxCountTitle.font = [UIFont systemFontOfSize:13.0];
@@ -277,52 +286,6 @@ shouldReloadTableForSearchScope:(NSInteger)searchOption
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     [tableView deselectRowAtIndexPath:[tableView indexPathForSelectedRow] animated:YES];
-}
-
-- (void)refreshReportCard {
-    [self initReportCard];
-    _refreshControl.attributedTitle = [[NSAttributedString alloc] initWithString:@"刷新成功"];
-    [self performSelector:@selector(endRefreshing) withObject:nil afterDelay:0.3];
-}
-
-- (void)refreshToFail {
-    _refreshControl.attributedTitle = [[NSAttributedString alloc] initWithString:@"刷新失败"];
-    [self performSelector:@selector(endRefreshing) withObject:nil afterDelay:0.3];
-    MBProgressHUD *hud = [[MBProgressHUD alloc] initWithView:self.view];
-    hud.labelFont = [UIFont systemFontOfSize:15.0];
-    hud.customView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_error_black"]];
-    hud.mode = MBProgressHUDModeCustomView;
-    hud.labelText = @"当前网络不可用";
-    hud.removeFromSuperViewOnHide = YES;
-    [self.view addSubview:hud];
-    [hud show:YES];
-    [hud hide:YES afterDelay:0.5];
-}
-
-- (void)refreshView:(UIRefreshControl *)sender {
-    sender.attributedTitle = [[NSAttributedString alloc] initWithString:@"刷新中..."];
-    if ([userDefaults boolForKey:_K_MODE_OFFLINE]) {
-        NSLog(@"成绩表-离线模式");
-        [self refreshReportCard];
-    } else {
-        if ([HWYAppDelegate isReachable]) {
-            [HWYNetworking getReportCardData:^(NSError *error) {
-                NSLog(@"成绩表-正常模式");
-                [self refreshReportCard];
-            }];
-        } else {
-            [self refreshToFail];
-        }
-    }
-}
-
-- (void)endRefreshing {
-    [_refreshControl endRefreshing];
-    [self performSelector:@selector(resetRefreshControl) withObject:nil afterDelay:0.3];
-}
-
-- (void)resetRefreshControl {
-    _refreshControl.attributedTitle = [[NSAttributedString alloc] initWithString:@"下拉刷新"];
 }
 
 - (void)rightItemClick:(UIButton *)sender {

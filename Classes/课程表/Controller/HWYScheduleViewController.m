@@ -10,7 +10,7 @@
 #import "HWYScheduleTableViewCell.h"
 #import "HWYScheduleWebViewController.h"
 #import "HWYScheduleData.h"
-#import "HWYGeneralConfig.h"
+#import "HWYAppDefine.h"
 #import "HWYNetworking.h"
 #import "MBProgressHUD.h"
 #import "HWYAppDelegate.h"
@@ -50,7 +50,7 @@
 
 - (void)initNavBar {
     [self configTitleAndLeftItem:@"课程表"];
-    if (![userDefaults boolForKey:_K_MODE_OFFLINE]) {
+    if (![KUserDefaults boolForKey:KModeOffline]) {
         UIBarButtonItem *rightItem = [[UIBarButtonItem alloc] initWithTitle:@"网页版" style:UIBarButtonItemStylePlain target:self action:@selector(rightItemClick:)];
         rightItem.tintColor = [UIColor whiteColor];
         [self.navigationItem setRightBarButtonItem:rightItem];
@@ -59,7 +59,7 @@
 
 - (void)initView {
     _pickerView = [[UIPickerView alloc] initWithFrame:CGRectMake(0, 0, P_WIDTH, 216)];
-    _pickerView.backgroundColor = kColor(200, 203, 211);
+    _pickerView.backgroundColor = KColor(200, 203, 211);
     _pickerView.dataSource = self;
     _pickerView.delegate = self;
     _toolBar = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, P_WIDTH, 44)];
@@ -92,15 +92,15 @@
     
     //定义tableView的headview
     _headerView = [[UIView alloc] initWithFrame:CGRectMake(0, 64, P_WIDTH, 33)];
-    _headerView.backgroundColor = kColor(251, 251, 251);
+    _headerView.backgroundColor = KColor(251, 251, 251);
     _headerView.layer.borderWidth = 0.5;
-    _headerView.layer.borderColor = [kColor(221, 221, 221) CGColor];
+    _headerView.layer.borderColor = [KColor(221, 221, 221) CGColor];
     
     UIButton *mondayBtn = [UIButton buttonWithType:UIButtonTypeCustom];
     mondayBtn.tag = 1000;
     mondayBtn.frame = CGRectMake(0, 0, 45, 30);
     [mondayBtn setTitle:@"一" forState:UIControlStateNormal];
-    [mondayBtn setTitleColor:_K_BLUE_COLOR forState:UIControlStateNormal];
+    [mondayBtn setTitleColor:KBlueColor forState:UIControlStateNormal];
     mondayBtn.titleLabel.font = [UIFont boldSystemFontOfSize:14.0];
     [mondayBtn addTarget:self action:@selector(selectBtnClick:) forControlEvents:UIControlEventTouchUpInside];
     [_headerView addSubview:mondayBtn];
@@ -112,7 +112,7 @@
     tuesdayBtn.tag = 1001;
     tuesdayBtn.frame = CGRectMake(45, 0, 46, 30);
     [tuesdayBtn setTitle:@"二" forState:UIControlStateNormal];
-    [tuesdayBtn setTitleColor:_K_BLUE_COLOR forState:UIControlStateNormal];
+    [tuesdayBtn setTitleColor:KBlueColor forState:UIControlStateNormal];
     tuesdayBtn.titleLabel.font = [UIFont boldSystemFontOfSize:14.0];
     [tuesdayBtn addTarget:self action:@selector(selectBtnClick:) forControlEvents:UIControlEventTouchUpInside];
     [_headerView addSubview:tuesdayBtn];
@@ -121,7 +121,7 @@
     wednesdayBtn.tag = 1002;
     wednesdayBtn.frame = CGRectMake(91, 0, 46, 30);
     [wednesdayBtn setTitle:@"三" forState:UIControlStateNormal];
-    [wednesdayBtn setTitleColor:_K_BLUE_COLOR forState:UIControlStateNormal];
+    [wednesdayBtn setTitleColor:KBlueColor forState:UIControlStateNormal];
     wednesdayBtn.titleLabel.font = [UIFont boldSystemFontOfSize:14.0];
     [wednesdayBtn addTarget:self action:@selector(selectBtnClick:) forControlEvents:UIControlEventTouchUpInside];
     [_headerView addSubview:wednesdayBtn];
@@ -130,7 +130,7 @@
     thursdayBtn.tag = 1003;
     thursdayBtn.frame = CGRectMake(137, 0, 46, 30);
     [thursdayBtn setTitle:@"四" forState:UIControlStateNormal];
-    [thursdayBtn setTitleColor:_K_BLUE_COLOR forState:UIControlStateNormal];
+    [thursdayBtn setTitleColor:KBlueColor forState:UIControlStateNormal];
     thursdayBtn.titleLabel.font = [UIFont boldSystemFontOfSize:14.0];
     [thursdayBtn addTarget:self action:@selector(selectBtnClick:) forControlEvents:UIControlEventTouchUpInside];
     [_headerView addSubview:thursdayBtn];
@@ -139,7 +139,7 @@
     fridayBtn.tag = 1004;
     fridayBtn.frame = CGRectMake(183, 0, 46, 30);
     [fridayBtn setTitle:@"五" forState:UIControlStateNormal];
-    [fridayBtn setTitleColor:_K_BLUE_COLOR forState:UIControlStateNormal];
+    [fridayBtn setTitleColor:KBlueColor forState:UIControlStateNormal];
     fridayBtn.titleLabel.font = [UIFont boldSystemFontOfSize:14.0];
     [fridayBtn addTarget:self action:@selector(selectBtnClick:) forControlEvents:UIControlEventTouchUpInside];
     [_headerView addSubview:fridayBtn];
@@ -148,7 +148,7 @@
     saturdayBtn.tag = 1005;
     saturdayBtn.frame = CGRectMake(229, 0, 46, 30);
     [saturdayBtn setTitle:@"六" forState:UIControlStateNormal];
-    [saturdayBtn setTitleColor:_K_BLUE_COLOR forState:UIControlStateNormal];
+    [saturdayBtn setTitleColor:KBlueColor forState:UIControlStateNormal];
     saturdayBtn.titleLabel.font = [UIFont boldSystemFontOfSize:14.0];
     [saturdayBtn addTarget:self action:@selector(selectBtnClick:) forControlEvents:UIControlEventTouchUpInside];
     [_headerView addSubview:saturdayBtn];
@@ -157,13 +157,13 @@
     sundayBtn.tag = 1006;
     sundayBtn.frame = CGRectMake(275, 0, 45, 30);
     [sundayBtn setTitle:@"日" forState:UIControlStateNormal];
-    [sundayBtn setTitleColor:_K_BLUE_COLOR forState:UIControlStateNormal];
+    [sundayBtn setTitleColor:KBlueColor forState:UIControlStateNormal];
     sundayBtn.titleLabel.font = [UIFont boldSystemFontOfSize:14.0];
     [sundayBtn addTarget:self action:@selector(selectBtnClick:) forControlEvents:UIControlEventTouchUpInside];
     [_headerView addSubview:sundayBtn];
     
     _selectView = [[UIView alloc] initWithFrame:CGRectMake(0, 30, 46, 3)];
-    _selectView.backgroundColor = _K_BLUE_COLOR;
+    _selectView.backgroundColor = KBlueColor;
     [_headerView addSubview:_selectView];
     
     _tableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 108, P_WIDTH, P_HEIGHT-108) style:UITableViewStylePlain];
@@ -206,7 +206,7 @@
 - (void)initSchedule {
     _scheduleArr = [HWYScheduleData getScheduleData:_semesterText.text];
     _currentArr = _scheduleArr[_currentBtn.tag - 1000];
-    if (!kArrayEmpty(_scheduleArr)) {
+    if (!KArrayEmpty(_scheduleArr)) {
         _tableView.tableHeaderView = _headerView;
     } else {
         _tableView.tableHeaderView = nil;
@@ -222,7 +222,7 @@
     hud.removeFromSuperViewOnHide = YES;
     [self.view addSubview:hud];
     [hud show:YES];
-    if ([userDefaults boolForKey:_K_MODE_OFFLINE]) {
+    if ([KUserDefaults boolForKey:KModeOffline]) {
         NSLog(@"课程表-离线模式");
         [self performSelector:@selector(initSchedule) withObject:nil afterDelay:0.5];
         [hud hide:YES afterDelay:0.5];
@@ -261,7 +261,7 @@
     if (indexPath.row%2 == 0) {
         cell.backgroundColor = [UIColor whiteColor];
     } else {
-        cell.backgroundColor = kColor(251, 251, 251);
+        cell.backgroundColor = KColor(251, 251, 251);
     }
     return cell;
 }
@@ -288,7 +288,7 @@
 
 - (void)refreshView:(UIRefreshControl *)sender {
     sender.attributedTitle = [[NSAttributedString alloc] initWithString:@"刷新中..."];
-    if ([userDefaults boolForKey:_K_MODE_OFFLINE]) {
+    if ([KUserDefaults boolForKey:KModeOffline]) {
         NSLog(@"课程表-离线模式");
         [self refreshSchedule];
     } else {

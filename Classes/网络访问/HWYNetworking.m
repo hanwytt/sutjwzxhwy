@@ -19,7 +19,7 @@
     manager.responseSerializer = [AFHTTPResponseSerializer serializer];
     NSDictionary *parameters = @{@"WebUserNO": name, @"Password": password, @"Agnomen": agnomen};
     [manager POST:JWZX_LOGIN_URL parameters:parameters success:^(AFHTTPRequestOperation *operation, id responseObject) {
-        block(YES, [HWYLoginJwzxData getLoginJwzxDataFromHtml:operation.responseString and:responseObject], nil);
+        block(YES, [HWYLoginJwzxData getLoginJwzxDataFromHtml:responseObject], nil);
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
         NSLog(@"error = %@",error);
         block(NO, nil, error);
@@ -247,27 +247,42 @@
     }];
 }
 
-+ (void)getNewsListData:(void(^)(NSError *error)) block {
-    [AFNetworkActivityIndicatorManager sharedManager].enabled = YES;
-    AFHTTPRequestOperationManager * manager = [AFHTTPRequestOperationManager manager];
-    manager.requestSerializer = [AFJSONRequestSerializer serializer];
-    manager.responseSerializer = [AFJSONResponseSerializer serializer];
+//+ (void)getNewsListData:(void(^)()) block {
+//    [AFNetworkActivityIndicatorManager sharedManager].enabled = YES;
+//    AFHTTPRequestOperationManager * manager = [AFHTTPRequestOperationManager manager];
+//    manager.requestSerializer = [AFJSONRequestSerializer serializer];
+//    manager.responseSerializer = [AFJSONResponseSerializer serializer];
+//    NSDictionary *parameters = @{
+//                                 @"map": @{@"method": @"getPimPlateList",
+//                                           @"params": [NSNull null]
+//                                           },
+//                                 @"javaClass": @"java.util.HashMap"
+//                                 };
+//    [manager POST:SZGD_CMS_URL parameters:parameters success:^(AFHTTPRequestOperation *operation, id responseObject) {
+//        NSArray *pimListArr = [HWYNewsListData getNewsListDataFromDict:responseObject];
+//        [HWYNewsListData saveNewsListData:pimListArr];
+//        block();
+//    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+//        block();
+//    }];
+//}
+
++ (void)getNewsListData:(void(^)()) block {
     NSDictionary *parameters = @{
                                  @"map": @{@"method": @"getPimPlateList",
                                            @"params": [NSNull null]
                                            },
                                  @"javaClass": @"java.util.HashMap"
                                  };
-    [manager POST:SZGD_CMS_URL parameters:parameters success:^(AFHTTPRequestOperation *operation, id responseObject) {
-        NSLog(@"%@",responseObject);
+    [HWYNetworkingJson POST:SZGD_CMS_URL paramters:parameters success:^(id responseObject) {
         NSArray *pimListArr = [HWYNewsListData getNewsListDataFromDict:responseObject];
         [HWYNewsListData saveNewsListData:pimListArr];
-        block(nil);
-    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-        NSLog(@"%@",error);
-        block(error);
+        block();
+    } failure:^(NSError *error) {
+        block();
     }];
 }
+
 
 + (void)getNewsInfoData:(NSString *)plateid type:(NSInteger)type compelet:(void(^)(NSError *error)) block {
     [AFNetworkActivityIndicatorManager sharedManager].enabled = YES;
@@ -442,6 +457,9 @@
         NSLog(@"%@",error);
         block(error);
     }];
+    
 }
+
+
 
 @end

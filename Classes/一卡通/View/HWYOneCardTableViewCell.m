@@ -7,7 +7,7 @@
 //
 
 #import "HWYOneCardTableViewCell.h"
-#import "HWYGeneralConfig.h"
+#import "HWYAppDefine.h"
 
 @implementation HWYOneCardTableViewCell
 
@@ -31,7 +31,7 @@
         self.layoutMargins = UIEdgeInsetsZero;
         
         UIView *selectView = [[UIView alloc] initWithFrame:self.frame];
-        selectView.backgroundColor = _K_CELL_SELECTED_COLOR;
+        selectView.backgroundColor = KCellSelectedColor;
         self.selectedBackgroundView = selectView;
         
         UILabel *ZDMCTitle = [[UILabel alloc] initWithFrame:CGRectMake(0, 3, 75, 21)];

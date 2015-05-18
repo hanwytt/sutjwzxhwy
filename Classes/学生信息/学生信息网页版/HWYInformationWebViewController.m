@@ -7,7 +7,7 @@
 //
 
 #import "HWYInformationWebViewController.h"
-#import "HWYGeneralConfig.h"
+#import "HWYAppDefine.h"
 #import "HWYURLConfig.h"
 #import "MBProgressHUD.h"
 #import "HWYAppDelegate.h"

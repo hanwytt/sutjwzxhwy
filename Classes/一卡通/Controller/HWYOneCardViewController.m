@@ -8,7 +8,7 @@
 
 #import "HWYOneCardViewController.h"
 #import "HWYOneCardTableViewCell.h"
-#import "HWYGeneralConfig.h"
+#import "HWYAppDefine.h"
 #import "HWYOneCardData.h"
 #import "HWYNetworking.h"
 #import "MBProgressHUD.h"
@@ -81,7 +81,7 @@
     hud.removeFromSuperViewOnHide = YES;
     [self.view addSubview:hud];
     [hud show:YES];
-    if ([userDefaults boolForKey:_K_MODE_OFFLINE]) {
+    if ([KUserDefaults boolForKey:KModeOffline]) {
         NSLog(@"一卡通-离线模式");
         [self performSelector:@selector(initOneCard) withObject:nil afterDelay:0.5];
         [hud hide:YES afterDelay:0.5];
@@ -121,13 +121,13 @@
     if (indexPath.row%2 == 0) {
         cell.backgroundColor = [UIColor whiteColor];
     } else {
-        cell.backgroundColor = kColor(251, 251, 251);
+        cell.backgroundColor = KColor(251, 251, 251);
     }
     return cell;
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
-    if (!kArrayEmpty(_oneCardRecordArr)) {
+    if (!KArrayEmpty(_oneCardRecordArr)) {
         return 48;
     }
     return 0;
@@ -135,9 +135,9 @@
 
 - (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section {
     UIView *headerView = [[UIView alloc] init];
-    headerView.backgroundColor = kColor(251, 251, 251);
+    headerView.backgroundColor = KColor(251, 251, 251);
     headerView.layer.borderWidth = 0.5;
-    headerView.layer.borderColor = [kColor(203, 214, 226) CGColor];
+    headerView.layer.borderColor = [KColor(203, 214, 226) CGColor];
     
     UILabel *XHTitle = [[UILabel alloc] initWithFrame:CGRectMake(0, 3, 75, 21)];
     XHTitle.font = [UIFont systemFontOfSize:15.0];
@@ -199,7 +199,7 @@
 
 - (void)refreshView:(UIRefreshControl *)sender {
     sender.attributedTitle = [[NSAttributedString alloc] initWithString:@"刷新中..."];
-    if ([userDefaults boolForKey:_K_MODE_OFFLINE]) {
+    if ([KUserDefaults boolForKey:KModeOffline]) {
         NSLog(@"一卡通-离线模式");
         [self refreshOneCard];
     } else {

@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "HWYNetworkingJson.h"
 #import "HWYNewsListData.h"
 #import "HWYNewsInfoData.h"
 #import "HWYNewsInfoDetailData.h"
@@ -47,7 +48,7 @@
 
 + (void)getLogoutSzgd:(void(^)(BOOL szgd, NSError *error)) block;
 
-+ (void)getNewsListData:(void(^)(NSError *error)) block;
++ (void)getNewsListData:(void(^)()) block;
 
 + (void)getNewsInfoData:(NSString *)plateid type:(NSInteger)type compelet:(void(^)(NSError *error)) block;
 

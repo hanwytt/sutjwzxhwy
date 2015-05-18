@@ -7,7 +7,7 @@
 //
 
 #import "HWYVersionViewController.h"
-#import "HWYGeneralConfig.h"
+#import "HWYAppDefine.h"
 
 @interface HWYVersionViewController ()
 
@@ -39,14 +39,14 @@
     UILabel *nameLable = [[UILabel alloc] initWithFrame:CGRectMake(0, 230, P_WIDTH, 21)];
     nameLable.font = [UIFont boldSystemFontOfSize:22.0];
     nameLable.textAlignment = NSTextAlignmentCenter;
-    nameLable.text = _K_DISPLAYNAME_STRING;
+    nameLable.text = KBundleDisplayName;
     [self.view addSubview:nameLable];
     
     UILabel *versionLable = [[UILabel alloc] initWithFrame:CGRectMake(0, 260, P_WIDTH, 21)];
     versionLable.font = [UIFont systemFontOfSize:17.0];
     versionLable.textColor = [UIColor grayColor];
     versionLable.textAlignment = NSTextAlignmentCenter;
-    versionLable.text = [NSString stringWithFormat:@"当前版本v%@", _K_VERSION_STRING];
+    versionLable.text = [NSString stringWithFormat:@"当前版本v%@", KBundleVersion];
     [self.view addSubview:versionLable];
     
     UILabel *descLable = [[UILabel alloc] initWithFrame:CGRectMake(0, P_HEIGHT - 41, P_WIDTH, 21)];

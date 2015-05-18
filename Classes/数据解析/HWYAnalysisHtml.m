@@ -11,7 +11,10 @@
 
 @implementation HWYAnalysisHtml
 
-+ (HWYLoginJwzxData *)getLoginJwzxDataFromHtml:(NSString *)responseString and:(id)responseObject {
++ (HWYLoginJwzxData *)getLoginJwzxDataFromHtml:(id)responseObject {
+    NSStringEncoding enc = CFStringConvertEncodingToNSStringEncoding(kCFStringEncodingGB_18030_2000);
+    NSString *responseString = [[NSString alloc] initWithData:responseObject encoding:enc];
+    NSLog(@"responseString = %@", responseString);
     HWYLoginJwzxData *jwzx = [[HWYLoginJwzxData alloc] init];
     TFHpple *xpathParser = [[TFHpple alloc] initWithHTMLData:responseObject encoding:@"gb2312"];
     TFHppleElement *element = nil;

@@ -8,7 +8,7 @@
 
 #import "HWYNewsInfoDetailViewController.h"
 #import "HWYNetworking.h"
-#import "HWYGeneralConfig.h"
+#import "HWYAppDefine.h"
 #import "MBProgressHUD.h"
 #import "HWYAppDelegate.h"
 
@@ -47,7 +47,7 @@
 - (void)initNewsInfoDetail {
     _newsInfoDetail = [HWYNewsInfoDetailData getNewsInfoDetailData:_resourceid];
     NSString *htmlString = [NSString string];
-    if (kStringExist(_newsInfoDetail.CONTENT)) {
+    if (KStringExist(_newsInfoDetail.CONTENT)) {
         htmlString = [self getHtmlString];
         [_webView loadHTMLString:htmlString baseURL:nil];
     } else {
@@ -71,7 +71,7 @@
     hud.removeFromSuperViewOnHide = YES;
     [self.view addSubview:hud];
     [hud show:YES];
-    if ([userDefaults boolForKey:_K_MODE_OFFLINE]) {
+    if ([KUserDefaults boolForKey:KModeOffline]) {
         NSLog(@"新闻详情-离线模式");
         [self performSelector:@selector(initNewsInfoDetail) withObject:nil afterDelay:0.5];
         [hud hide:YES afterDelay:0.5];
@@ -103,10 +103,10 @@
     [htmlString appendString:@"</head>"];
     [htmlString appendString:@"<body>"];
     [htmlString appendFormat:@"<p align=\"center\"><strong>%@</strong></p>", _newsInfoDetail.TITLE];
-    if (!kStringExist(_newsInfoDetail.NEWS_REPORTER)) {
+    if (!KStringExist(_newsInfoDetail.NEWS_REPORTER)) {
         _newsInfoDetail.NEWS_REPORTER = @"";
     }
-    if (!kStringExist(_newsInfoDetail.NEWS_EDITOR)) {
+    if (!KStringExist(_newsInfoDetail.NEWS_EDITOR)) {
         _newsInfoDetail.NEWS_EDITOR = @"";
     }
     [htmlString appendFormat:@"<p align=\"center\" class=\"text-content\"><strong>%@&nbsp;&nbsp;%@&nbsp;&nbsp;%@</strong></p>", _newsInfoDetail.AUDIT_TIME, _newsInfoDetail.NEWS_REPORTER, _newsInfoDetail.NEWS_EDITOR];

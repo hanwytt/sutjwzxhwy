@@ -8,7 +8,7 @@
 
 #import "HWYRightViewController.h"
 #import "HWYAppDelegate.h"
-#import "HWYGeneralConfig.h"
+#import "HWYAppDefine.h"
 
 static CGFloat range = P_WIDTH/2 - 70 + P_WIDTH * 0.8 * 0.5;    //218
 

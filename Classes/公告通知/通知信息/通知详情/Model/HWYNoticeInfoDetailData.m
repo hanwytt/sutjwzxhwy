@@ -7,7 +7,7 @@
 //
 
 #import "HWYNoticeInfoDetailData.h"
-#import "HWYGeneralConfig.h"
+#import "HWYAppDefine.h"
 #import "FMDB.h"
 
 @implementation HWYNoticeInfoDetailData
@@ -35,7 +35,7 @@
 }
 
 + (void)saveNoticeInfoDetailData:(HWYNoticeInfoDetailData *)noticeInfoDetail {
-    NSString *dbpath = [DocumentsDirectory stringByAppendingPathComponent:_K_DATABASE];
+    NSString *dbpath = [KDocumentsDirectory stringByAppendingPathComponent:KDatabase];
     FMDatabase* db = [FMDatabase databaseWithPath:dbpath];
     if (![db open]) {
         NSLog(@"Could not open db.");
@@ -51,7 +51,7 @@
 }
 
 + (HWYNoticeInfoDetailData *)getNoticeInfoDetailData:(NSString *)resourceid {
-    NSString *dbpath = [DocumentsDirectory stringByAppendingPathComponent:_K_DATABASE];
+    NSString *dbpath = [KDocumentsDirectory stringByAppendingPathComponent:KDatabase];
     FMDatabase* db = [FMDatabase databaseWithPath:dbpath];
     if (![db open]) {
         NSLog(@"Could not open db.");

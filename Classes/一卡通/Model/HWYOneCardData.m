@@ -7,7 +7,7 @@
 //
 
 #import "HWYOneCardData.h"
-#import "HWYGeneralConfig.h"
+#import "HWYAppDefine.h"
 #import "FMDB.h"
 
 @implementation HWYOneCardBalanceData
@@ -26,7 +26,7 @@
 }
 
 + (void)saveOneCardBalanceData:(HWYOneCardBalanceData *)oneCardBalance {
-    NSString *dbpath = [DocumentsDirectory stringByAppendingPathComponent:_K_DATABASE];
+    NSString *dbpath = [KDocumentsDirectory stringByAppendingPathComponent:KDatabase];
     FMDatabase* db = [FMDatabase databaseWithPath:dbpath];
     if (![db open]) {
         NSLog(@"Could not open db.");
@@ -42,13 +42,13 @@
 }
 
 + (HWYOneCardBalanceData *)getOneCardBalanceData {
-    NSString *dbpath = [DocumentsDirectory stringByAppendingPathComponent:_K_DATABASE];
+    NSString *dbpath = [KDocumentsDirectory stringByAppendingPathComponent:KDatabase];
     FMDatabase* db = [FMDatabase databaseWithPath:dbpath];
     if (![db open]) {
         NSLog(@"Could not open db.");
         return nil;
     }
-    NSString *number = [userDefaults valueForKey:_K_DEFAULT_NUMBER];
+    NSString *number = [KUserDefaults valueForKey:KDefaultNumber];
     FMResultSet *rs = [db executeQuery:@"SELECT * FROM szgd_onecard_balance where XH = ?", number];
     HWYOneCardBalanceData *oneCardBalance = [HWYOneCardBalanceData new];
     if ([rs next]) {
@@ -103,7 +103,7 @@
 
 
 + (void)saveOneCardRecordData:(NSArray *)arr {
-    NSString *dbpath = [DocumentsDirectory stringByAppendingPathComponent:_K_DATABASE];
+    NSString *dbpath = [KDocumentsDirectory stringByAppendingPathComponent:KDatabase];
     FMDatabase* db = [FMDatabase databaseWithPath:dbpath];
     if (![db open]) {
         NSLog(@"Could not open db.");
@@ -121,13 +121,13 @@
 }
 
 + (NSArray *)getOneCardRecordData {
-    NSString *dbpath = [DocumentsDirectory stringByAppendingPathComponent:_K_DATABASE];
+    NSString *dbpath = [KDocumentsDirectory stringByAppendingPathComponent:KDatabase];
     FMDatabase* db = [FMDatabase databaseWithPath:dbpath];
     if (![db open]) {
         NSLog(@"Could not open db.");
         return nil;
     }
-    NSString *number = [userDefaults valueForKey:_K_DEFAULT_NUMBER];
+    NSString *number = [KUserDefaults valueForKey:KDefaultNumber];
     FMResultSet *rs = [db executeQuery:@"SELECT * FROM szgd_onecard_record where XH = ? order by time desc", number];
     NSMutableArray *oneCardRecordArr = [NSMutableArray array];
     while ([rs next]) {

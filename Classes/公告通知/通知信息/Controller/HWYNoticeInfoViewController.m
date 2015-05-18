@@ -10,7 +10,7 @@
 #import "HWYNoticeInfoTableViewCell.h"
 #import "HWYNoticeInfoDetailViewController.h"
 #import "HWYNoticeInfoData.h"
-#import "HWYGeneralConfig.h"
+#import "HWYAppDefine.h"
 #import "HWYNetworking.h"
 #import "HWYAppDelegate.h"
 #import "MBProgressHUD.h"
@@ -84,12 +84,12 @@
     hud.removeFromSuperViewOnHide = YES;
     [self.view addSubview:hud];
     [hud show:YES];
-    if ([userDefaults boolForKey:_K_MODE_OFFLINE]) {
+    if ([KUserDefaults boolForKey:KModeOffline]) {
         NSLog(@"通知信息-离线模式");
         [self performSelector:@selector(initNoticeInfo) withObject:nil afterDelay:0.5];
         [hud hide:YES afterDelay:0.5];
     } else {
-        if ([userDefaults boolForKey:_K_MODE_OFFLINE]) {
+        if ([KUserDefaults boolForKey:KModeOffline]) {
             [self performSelector:@selector(initNoticeInfo) withObject:nil afterDelay:0.5];
             [hud hide:YES afterDelay:0.5];
         } else {
@@ -127,7 +127,7 @@
     if (indexPath.row%2 == 0) {
         cell.backgroundColor = [UIColor whiteColor];
     } else {
-        cell.backgroundColor = kColor(251, 251, 251);
+        cell.backgroundColor = KColor(251, 251, 251);
     }
     return cell;
 }
@@ -167,7 +167,7 @@
 
 - (void)refreshView:(UIRefreshControl *)sender {
     sender.attributedTitle = [[NSAttributedString alloc] initWithString:@"刷新中..."];
-    if ([userDefaults boolForKey:_K_MODE_OFFLINE]) {
+    if ([KUserDefaults boolForKey:KModeOffline]) {
         NSLog(@"通知信息-离线模式");
         [self refreshNoticeInfo];
     } else {

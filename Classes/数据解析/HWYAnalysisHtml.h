@@ -14,7 +14,7 @@
 @interface HWYAnalysisHtml : NSObject
 
 //解析登录教务在线结果
-+ (HWYLoginJwzxData *)getLoginJwzxDataFromHtml:(NSString *)responseString and:(id)responseObject;
++ (HWYLoginJwzxData *)getLoginJwzxDataFromHtml:(id)responseObject;
 //解析个人信息
 + (NSArray *)getInformationArrFromHtml:(id)responseObject;
 //解析课程表

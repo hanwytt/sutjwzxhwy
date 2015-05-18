@@ -7,13 +7,13 @@
 //
 
 #import "HWYLoginOffLineData.h"
-#import "HWYGeneralConfig.h"
+#import "HWYAppDefine.h"
 #import "FMDB.h"
 
 @implementation HWYLoginOffLineData
 
 + (BOOL)getLoginOffLineData:(NSString *)name password:(NSString *)password {
-    NSString *dbpath = [DocumentsDirectory stringByAppendingPathComponent:_K_DATABASE];
+    NSString *dbpath = [KDocumentsDirectory stringByAppendingPathComponent:KDatabase];
     FMDatabase* db = [FMDatabase databaseWithPath:dbpath];
     if (![db open]) {
         NSLog(@"Could not open db.");
@@ -30,7 +30,7 @@
 }
 
 + (NSString *)getLoginOffLinePassword:(NSString *)name {
-    NSString *dbpath = [DocumentsDirectory stringByAppendingPathComponent:_K_DATABASE];
+    NSString *dbpath = [KDocumentsDirectory stringByAppendingPathComponent:KDatabase];
     FMDatabase* db = [FMDatabase databaseWithPath:dbpath];
     if (![db open]) {
         NSLog(@"Could not open db.");
@@ -39,7 +39,7 @@
     FMResultSet *rs = [db executeQuery:@"SELECT * FROM jwzx_szgd_login where number = ?", name];
     NSString *pwd = [NSString string];
     if ([rs next]) {
-        if (kStringExist([rs stringForColumnIndex:1])) {
+        if (KStringExist([rs stringForColumnIndex:1])) {
             pwd = [rs stringForColumnIndex:1];
         } else {
             pwd = [rs stringForColumnIndex:2];

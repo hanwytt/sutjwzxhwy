@@ -9,7 +9,7 @@
 #import "HWYLoginSzgdViewController.h"
 #import "HWYLoginSzgdData.h"
 #import "HWYAppDelegate.h"
-#import "HWYGeneralConfig.h"
+#import "HWYAppDefine.h"
 #import "HWYNetworking.h"
 #import "MBProgressHUD.h"
 #import "Reachability.h"
@@ -72,8 +72,8 @@
     _nameField.placeholder = @"请输入账号";
     _nameField.clearButtonMode = UITextFieldViewModeWhileEditing;
     _nameField.borderStyle = UITextBorderStyleNone;
-    NSString *number = [userDefaults valueForKey:_K_DEFAULT_NUMBER];
-    if (kStringExist(number)) {
+    NSString *number = [KUserDefaults valueForKey:KDefaultNumber];
+    if (KStringExist(number)) {
         _nameField.text = number;
         if (_login) {
             _nameField.enabled = NO;
@@ -95,9 +95,9 @@
     _passwordField.clearButtonMode = UITextFieldViewModeWhileEditing;
     _passwordField.borderStyle = UITextBorderStyleNone;
     _passwordField.secureTextEntry = YES;
-    if ([userDefaults boolForKey:_K_MODE_REMEMb]) {
+    if ([KUserDefaults boolForKey:KModeRememb]) {
         NSString *pwd = [HWYLoginSzgdData getLoginSzgdPassword:number];
-        if (kStringExist(pwd)) {
+        if (KStringExist(pwd)) {
             _passwordField.text = pwd;
         }
     }
@@ -120,7 +120,7 @@
     _nextItem=[[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"icon_next_disabled"] style:UIBarButtonItemStylePlain target:self action:@selector(nextItemClick:)];
     UIBarButtonItem *spaceItem=[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
     UIBarButtonItem *doneItem=[[UIBarButtonItem alloc] initWithTitle:@"确定" style:UIBarButtonItemStylePlain target:self action:@selector(doneItemClick:)];
-    doneItem.tintColor = _K_BLUE_COLOR;
+    doneItem.tintColor = KBlueColor;
     UIToolbar *toolBar = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, P_WIDTH, 44)];
     toolBar.items = @[ _previousItem, _nextItem, spaceItem, doneItem];
     _nameField.inputAccessoryView = toolBar;
@@ -249,9 +249,9 @@
                         hud.labelText = @"登录成功";
                         [self performSelector:@selector(dismiss) withObject:nil afterDelay:0.5];
                         [hud hide:YES afterDelay:0.5];
-                        if (![_nameField.text isEqualToString:[userDefaults valueForKey:_K_DEFAULT_NUMBER]]) {
-                            [userDefaults setObject:_nameField.text forKey:_K_DEFAULT_NUMBER];
-                            [userDefaults synchronize];
+                        if (![_nameField.text isEqualToString:[KUserDefaults valueForKey:KDefaultNumber]]) {
+                            [KUserDefaults setObject:_nameField.text forKey:KDefaultNumber];
+                            [KUserDefaults synchronize];
                         }
                         [HWYLoginSzgdData saveLoginSzgdData:_nameField.text password:_passwordField.text];
                     } else {

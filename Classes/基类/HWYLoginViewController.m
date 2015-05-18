@@ -7,7 +7,7 @@
 //
 
 #import "HWYLoginViewController.h"
-#import "HWYGeneralConfig.h"
+#import "HWYAppDefine.h"
 
 @interface HWYLoginViewController ()
 
@@ -41,7 +41,7 @@
 }
 
 - (void)initBaseView {
-//    _navBar = [[UINavigationBar alloc] initWithFrame:CGRectMake(0, 0, P_WIDTH, STATUS_BAR_HEIGHT+NAVIGATIONBAR_HEIGHT)];
+//    _navBar = [[UINavigationBar alloc] initWithFrame:CGRectMake(0, 0, P_WIDTH, KSatusBarHeight+KNavBarHeight)];
 //    [_navBar setBackgroundImage:[UIImage imageNamed:@"bg_nav_bar_iOS7"] forBarMetrics:UIBarMetricsDefault];
 //    _navBar.translucent = NO;
 //    _navBar.titleTextAttributes = @{NSFontAttributeName: [UIFont boldSystemFontOfSize:18], NSForegroundColorAttributeName: [UIColor whiteColor]};

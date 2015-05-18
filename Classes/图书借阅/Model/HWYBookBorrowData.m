@@ -7,7 +7,7 @@
 //
 
 #import "HWYBookBorrowData.h"
-#import "HWYGeneralConfig.h"
+#import "HWYAppDefine.h"
 #import "FMDB.h"
 
 @implementation HWYBookBorrowData
@@ -28,13 +28,13 @@
 }
 
 + (void)saveBookBorrowData:(NSArray *)arr {
-    NSString *dbpath = [DocumentsDirectory stringByAppendingPathComponent:_K_DATABASE];
+    NSString *dbpath = [KDocumentsDirectory stringByAppendingPathComponent:KDatabase];
     FMDatabase* db = [FMDatabase databaseWithPath:dbpath];
     if (![db open]) {
         NSLog(@"Could not open db.");
         return ;
     }
-     NSString *number = [userDefaults valueForKey:_K_DEFAULT_NUMBER];
+     NSString *number = [KUserDefaults valueForKey:KDefaultNumber];
     FMResultSet *rs = [db executeQuery:@"SELECT * FROM szgd_bookborrow where number = ?", number];
     if ([rs next]) {
         [db executeUpdate:@"delete from szgd_bookborrow where number = ?", number];
@@ -51,13 +51,13 @@
 }
 
 + (NSArray *)getBookBorrowData {
-    NSString *dbpath = [DocumentsDirectory stringByAppendingPathComponent:_K_DATABASE];
+    NSString *dbpath = [KDocumentsDirectory stringByAppendingPathComponent:KDatabase];
     FMDatabase* db = [FMDatabase databaseWithPath:dbpath];
     if (![db open]) {
         NSLog(@"Could not open db.");
         return nil;
     }
-    NSString *number = [userDefaults valueForKey:_K_DEFAULT_NUMBER];
+    NSString *number = [KUserDefaults valueForKey:KDefaultNumber];
     FMResultSet *rs = [db executeQuery:@"SELECT * FROM szgd_bookborrow where number = ? order by lendDate asc", number];
     NSMutableArray *bookBorrowArr = [NSMutableArray array];
     while ([rs next]) {

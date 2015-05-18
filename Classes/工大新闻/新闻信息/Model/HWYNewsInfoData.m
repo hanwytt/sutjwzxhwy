@@ -7,7 +7,7 @@
 //
 
 #import "HWYNewsInfoData.h"
-#import "HWYGeneralConfig.h"
+#import "HWYAppDefine.h"
 #import "FMDB.h"
 
 @implementation HWYNewsInfoData
@@ -37,7 +37,7 @@
 }
 
 + (void)saveNewsInfoData:(NSArray *)arr type:(NSInteger)type {
-    NSString *dbpath = [DocumentsDirectory stringByAppendingPathComponent:_K_DATABASE];
+    NSString *dbpath = [KDocumentsDirectory stringByAppendingPathComponent:KDatabase];
     FMDatabase* db = [FMDatabase databaseWithPath:dbpath];
     if (![db open]) {
         NSLog(@"Could not open db.");
@@ -67,7 +67,7 @@
 }
 
 + (NSArray *)getNewsInfoData:(NSString *)plateid type:(NSInteger)type{
-    NSString *dbpath = [DocumentsDirectory stringByAppendingPathComponent:_K_DATABASE];
+    NSString *dbpath = [KDocumentsDirectory stringByAppendingPathComponent:KDatabase];
     FMDatabase* db = [FMDatabase databaseWithPath:dbpath];
     if (![db open]) {
         NSLog(@"Could not open db.");

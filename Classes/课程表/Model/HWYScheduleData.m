@@ -8,7 +8,7 @@
 
 #import "HWYScheduleData.h"
 #import "HWYAnalysisHtml.h"
-#import "HWYGeneralConfig.h"
+#import "HWYAppDefine.h"
 #import "FMDB.h"
 
 @implementation HWYScheduleData
@@ -36,13 +36,13 @@
 }
 
 + (void)saveScheduleData:(NSArray *)arr {
-    NSString *dbpath = [DocumentsDirectory stringByAppendingPathComponent:_K_DATABASE];
+    NSString *dbpath = [KDocumentsDirectory stringByAppendingPathComponent:KDatabase];
     FMDatabase* db = [FMDatabase databaseWithPath:dbpath];
     if (![db open]) {
         NSLog(@"Could not open db.");
         return ;
     }
-    NSString *number = [userDefaults valueForKey:_K_DEFAULT_NUMBER];
+    NSString *number = [KUserDefaults valueForKey:KDefaultNumber];
     for (HWYScheduleData *schedule in arr) {
         FMResultSet *rs = [db executeQuery:@"SELECT * FROM jwzx_schedule where number = ? and semester = ? and week = ? and section = ?", number, schedule.semester, [NSNumber numberWithInteger:schedule.week], [NSNumber numberWithInteger:schedule.section]];
         if ([rs next]) {
@@ -64,13 +64,13 @@
         }
         [scheduleArr addObject:arr];
     }
-    NSString *dbpath = [DocumentsDirectory stringByAppendingPathComponent:_K_DATABASE];
+    NSString *dbpath = [KDocumentsDirectory stringByAppendingPathComponent:KDatabase];
     FMDatabase* db = [FMDatabase databaseWithPath:dbpath];
     if (![db open]) {
         NSLog(@"Could not open db.");
         return nil;
     }
-    NSString *number = [userDefaults valueForKey:_K_DEFAULT_NUMBER];
+    NSString *number = [KUserDefaults valueForKey:KDefaultNumber];
     FMResultSet *rs = [db executeQuery:@"SELECT * FROM jwzx_schedule where number = ? and semester = ?", number, semester];
     while ([rs next]) {
         HWYScheduleData *schedule = [HWYScheduleData new];

@@ -8,7 +8,7 @@
 
 #import "HWYReportCardData.h"
 #import "HWYAnalysisHtml.h"
-#import "HWYGeneralConfig.h"
+#import "HWYAppDefine.h"
 #import "FMDB.h"
 
 @implementation HWYReportCountData
@@ -24,13 +24,13 @@
 }
 
 + (void)saveReportCountData:(HWYReportCountData *)reportCount {
-    NSString *dbpath = [DocumentsDirectory stringByAppendingPathComponent:_K_DATABASE];
+    NSString *dbpath = [KDocumentsDirectory stringByAppendingPathComponent:KDatabase];
     FMDatabase* db = [FMDatabase databaseWithPath:dbpath];
     if (![db open]) {
         NSLog(@"Could not open db.");
         return ;
     }
-    NSString *number = [userDefaults valueForKey:_K_DEFAULT_NUMBER];
+    NSString *number = [KUserDefaults valueForKey:KDefaultNumber];
     FMResultSet *rs = [db executeQuery:@"SELECT * FROM jwzx_report_count where number = ?", number];
     if ([rs next]) {
         [db executeUpdate:@"update jwzx_report_count set bxCount = ?, xxCount = ?,rxCount = ?, stuCount = ? where number = ?", reportCount.bxCount, reportCount.xxCount, reportCount.rxCount, reportCount.stuCount, number];
@@ -41,13 +41,13 @@
 }
 
 + (HWYReportCountData *)getReportCountData {
-    NSString *dbpath = [DocumentsDirectory stringByAppendingPathComponent:_K_DATABASE];
+    NSString *dbpath = [KDocumentsDirectory stringByAppendingPathComponent:KDatabase];
     FMDatabase* db = [FMDatabase databaseWithPath:dbpath];
     if (![db open]) {
         NSLog(@"Could not open db.");
         return nil;
     }
-    NSString *number = [userDefaults valueForKey:_K_DEFAULT_NUMBER];
+    NSString *number = [KUserDefaults valueForKey:KDefaultNumber];
     FMResultSet *rs = [db executeQuery:@"SELECT * FROM jwzx_report_count where number = ?", number];
     HWYReportCountData *reportCount = [HWYReportCountData new];
     if ([rs next]) {
@@ -86,13 +86,13 @@
 }
 
 + (void)saveReportCardData:(NSArray *)arr {
-    NSString *dbpath = [DocumentsDirectory stringByAppendingPathComponent:_K_DATABASE];
+    NSString *dbpath = [KDocumentsDirectory stringByAppendingPathComponent:KDatabase];
     FMDatabase* db = [FMDatabase databaseWithPath:dbpath];
     if (![db open]) {
         NSLog(@"Could not open db.");
         return ;
     }
-    NSString *number = [userDefaults valueForKey:_K_DEFAULT_NUMBER];
+    NSString *number = [KUserDefaults valueForKey:KDefaultNumber];
     for (HWYReportCardData *reportCard in arr) {
         FMResultSet *rs = [db executeQuery:@"SELECT * FROM jwzx_report_card where number = ? and courseId = ?", number, reportCard.courseId];
         if ([rs next]) {
@@ -105,13 +105,13 @@
 }
 
 + (NSArray *)getReportCardData {
-    NSString *dbpath = [DocumentsDirectory stringByAppendingPathComponent:_K_DATABASE];
+    NSString *dbpath = [KDocumentsDirectory stringByAppendingPathComponent:KDatabase];
     FMDatabase* db = [FMDatabase databaseWithPath:dbpath];
     if (![db open]) {
         NSLog(@"Could not open db.");
         return nil;
     }
-    NSString *number = [userDefaults valueForKey:_K_DEFAULT_NUMBER];
+    NSString *number = [KUserDefaults valueForKey:KDefaultNumber];
     FMResultSet *rs = [db executeQuery:@"SELECT * FROM jwzx_report_card where number = ? order by semesterId desc, ordernum asc", number];
     NSMutableArray *reportCardArr = [NSMutableArray array];
     while ([rs next]) {
@@ -132,13 +132,13 @@
 }
 
 + (NSArray *)queryReportCardData:(NSString *)courseName {
-    NSString *dbpath = [DocumentsDirectory stringByAppendingPathComponent:_K_DATABASE];
+    NSString *dbpath = [KDocumentsDirectory stringByAppendingPathComponent:KDatabase];
     FMDatabase* db = [FMDatabase databaseWithPath:dbpath];
     if (![db open]) {
         NSLog(@"Could not open db.");
         return nil;
     }
-    NSString *number = [userDefaults valueForKey:_K_DEFAULT_NUMBER];
+    NSString *number = [KUserDefaults valueForKey:KDefaultNumber];
     courseName = [NSString stringWithFormat:@"%%%@%%", courseName];
     FMResultSet *rs = [db executeQuery:@"SELECT * FROM jwzx_report_card where number = ? and courseName like ? order by semesterId desc", number, courseName];
     NSMutableArray *reportCardArr = [NSMutableArray array];

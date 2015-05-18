@@ -9,7 +9,7 @@
 #import "HWYSetViewController.h"
 #import "HWYVersionViewController.h"
 #import <MessageUI/MFMailComposeViewController.h>
-#import "HWYGeneralConfig.h"
+#import "HWYAppDefine.h"
 #import "MBProgressHUD.h"
 #import "HWYNetworking.h"
 #import "HWYAppDelegate.h"
@@ -90,7 +90,7 @@
     cell.layoutMargins = UIEdgeInsetsZero;
     
     UIView *selectView = [[UIView alloc] initWithFrame:cell.frame];
-    selectView.backgroundColor = _K_CELL_SELECTED_COLOR;
+    selectView.backgroundColor = KCellSelectedColor;
     cell.selectedBackgroundView = selectView;
     
     cell.textLabel.font = [UIFont systemFontOfSize:15.0];
@@ -103,13 +103,13 @@
             BOOL on;
             switch (indexPath.row) {
                 case 0:
-                    on = [userDefaults boolForKey:_K_MODE_OFFLINE];
+                    on = [KUserDefaults boolForKey:KModeOffline];
                     break;
                 case 1:
-                    on = [userDefaults boolForKey:_K_MODE_REMEMb];
+                    on = [KUserDefaults boolForKey:KModeRememb];
                     break;
                 case 2:
-                    on = [userDefaults boolForKey:_K_MODE_AUTOIDENTIFICATION];
+                    on = [KUserDefaults boolForKey:KModeAutoIdentification];
                     break;
                 default:
                     break;
@@ -136,19 +136,27 @@
     NSInteger section = indexPath.section;
     NSInteger row = indexPath.row;
     HWYVersionViewController *viewController = nil;
-    if (section == 1) {
-        switch (row) {
-            case 0:
-                viewController = [HWYVersionViewController new];
-                break;
-            case 1:
-                [self sendMail];
-                return;
-                break;
-            default:
-                return;
-                break;
-        }
+    switch (section) {
+        case 0:
+            return;
+            break;
+        case 1:
+            switch (row) {
+                case 0:
+                    viewController = [HWYVersionViewController new];
+                    break;
+                case 1:
+                    [self sendMail];
+                    return;
+                    break;
+                default:
+                    return;
+                    break;
+            }
+            break;
+        default:
+            return;
+            break;
     }
     [self.navigationController pushViewController:viewController animated:YES];
 }
@@ -157,18 +165,18 @@
     BOOL on = sender.on;
     switch (sender.tag) {
         case 1000:
-            [userDefaults setBool:on forKey:_K_MODE_OFFLINE];
+            [KUserDefaults setBool:on forKey:KModeOffline];
             break;
         case 1001:
-            [userDefaults setBool:on forKey:_K_MODE_REMEMb];
+            [KUserDefaults setBool:on forKey:KModeRememb];
             break;
         case 1002:
-            [userDefaults setBool:on forKey:_K_MODE_AUTOIDENTIFICATION];
+            [KUserDefaults setBool:on forKey:KModeAutoIdentification];
             break;
         default:
             break;
     }
-    [userDefaults synchronize];
+    [KUserDefaults synchronize];
 }
 
 - (void)sendMail

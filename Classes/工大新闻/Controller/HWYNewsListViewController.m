@@ -9,10 +9,11 @@
 #import "HWYNewsListViewController.h"
 #import "HWYNewsInfoViewController.h"
 #import "HWYNewsListData.h"
-#import "HWYGeneralConfig.h"
+#import "HWYAppDefine.h"
 #import "HWYNetworking.h"
-#import "MBProgressHUD.h"
+#import "MBProgressHUD+MJ.h"
 #import "HWYAppDelegate.h"
+#import "MJRefresh.h"
 
 @interface HWYNewsListViewController () <UITableViewDataSource,UITableViewDelegate> {
     NSString *_identify;
@@ -55,7 +56,11 @@
     _identify = @"newsListCell";
     [_tableView registerClass:[UITableViewCell class] forCellReuseIdentifier:_identify];
     [self.view addSubview:_tableView];
-    [self addRefreshControl];
+//    [self addRefreshControl];
+    __weak typeof(self) weakSelf = self;
+    [self.tableView addLegendHeaderWithRefreshingBlock:^{
+        [weakSelf requestNetworking];
+    }];
 }
 
 - (void)addRefreshControl {
@@ -70,33 +75,22 @@
     _newsTypeArr = @[@"工大要闻", @"头版头条"];
     _newsListArr = [HWYNewsListData getNewsListData];
     [_tableView reloadData];
+    [self.tableView.header endRefreshing];
 }
 
 - (void)requestNetworking {
-    MBProgressHUD *hud = [[MBProgressHUD alloc] initWithView:self.view];
-    hud.labelFont = [UIFont systemFontOfSize:15.0];
-    hud.mode = MBProgressHUDModeIndeterminate;
-    hud.labelText = @"加载中";
-    hud.removeFromSuperViewOnHide = YES;
-    [self.view addSubview:hud];
-    [hud show:YES];
-    if ([userDefaults boolForKey:_K_MODE_OFFLINE]) {
+    MBProgressHUD *hud = [MBProgressHUD showMessage:@"加载中" toView:self.view];
+    if ([KUserDefaults boolForKey:KModeOffline]) {
         NSLog(@"新闻列表-离线模式");
-        [self performSelector:@selector(initNewsList) withObject:nil afterDelay:0.6];
-        [hud hide:YES afterDelay:0.6];
+        [hud hideHUDDefaultDelay:^{
+            [self initNewsList];
+        }];
     } else {
-        if ([HWYAppDelegate isReachable]) {
-            NSLog(@"新闻列表-正常模式");
-            [HWYNetworking getNewsListData:^(NSError *error) {
-                [self initNewsList];
-                [hud hide:YES];
-            }];
-        } else {
-            hud.customView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_error_black"]];
-            hud.mode = MBProgressHUDModeCustomView;
-            hud.labelText = @"当前网络不可用";
-            [hud hide:YES afterDelay:0.6];
-        }
+        NSLog(@"新闻列表-正常模式");
+        [HWYNetworking getNewsListData:^() {
+            [self initNewsList];
+            [hud hide:YES];
+        }];
     }
 }
 
@@ -123,7 +117,7 @@
     cell.separatorInset = UIEdgeInsetsZero;
     cell.layoutMargins = UIEdgeInsetsZero;
     UIView *selectView = [[UIView alloc] initWithFrame:cell.frame];
-    selectView.backgroundColor = _K_CELL_SELECTED_COLOR;
+    selectView.backgroundColor = KCellSelectedColor;
     cell.selectedBackgroundView = selectView;
     cell.textLabel.font = [UIFont systemFontOfSize:17.0];
     if (indexPath.section == 0) {
@@ -137,7 +131,7 @@
     if (indexPath.row%2 == 0) {
         cell.backgroundColor = [UIColor whiteColor];
     } else {
-        cell.backgroundColor = kColor(251, 251, 251);
+        cell.backgroundColor = KColor(251, 251, 251);
     }
     return cell;
 }
@@ -203,12 +197,12 @@
 
 - (void)refreshView:(UIRefreshControl *)sender {
     sender.attributedTitle = [[NSAttributedString alloc] initWithString:@"刷新中..."];
-    if ([userDefaults boolForKey:_K_MODE_OFFLINE]) {
+    if ([KUserDefaults boolForKey:KModeOffline]) {
         NSLog(@"新闻列表-离线模式");
         [self refreshNewsList];
     } else {
         if ([HWYAppDelegate isReachable]) {
-            [HWYNetworking getNewsListData:^(NSError *error) {
+            [HWYNetworking getNewsListData:^() {
                 NSLog(@"新闻列表-正常模式");
                 [self refreshNewsList];
             }];

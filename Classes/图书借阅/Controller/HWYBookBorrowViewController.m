@@ -10,7 +10,7 @@
 #import "HWYBookBorrowTableViewCell.h"
 #import "HWYBookBorrowData.h"
 #import "MBProgressHUD.h"
-#import "HWYGeneralConfig.h"
+#import "HWYAppDefine.h"
 #import "HWYNetworking.h"
 #import "HWYAppDelegate.h"
 
@@ -64,7 +64,7 @@
 
 - (void)initBookBorrow {
     _bookBorrowArr = [HWYBookBorrowData getBookBorrowData];
-    if (kArrayEmpty(_bookBorrowArr)) {
+    if (KArrayEmpty(_bookBorrowArr)) {
         MBProgressHUD *hud = [[MBProgressHUD alloc] initWithView:self.view];
         hud.labelFont = [UIFont systemFontOfSize:15.0];
         hud.mode = MBProgressHUDModeText;
@@ -86,7 +86,7 @@
     hud.removeFromSuperViewOnHide = YES;
     [self.view addSubview:hud];
     [hud show:YES];
-    if ([userDefaults boolForKey:_K_MODE_OFFLINE]) {
+    if ([KUserDefaults boolForKey:KModeOffline]) {
         NSLog(@"图书借阅-离线模式");
         [self performSelector:@selector(initBookBorrow) withObject:nil afterDelay:0.5];
         [hud hide:YES afterDelay:0.5];
@@ -124,7 +124,7 @@
     if (indexPath.row%2 == 0) {
         cell.backgroundColor = [UIColor whiteColor];
     } else {
-        cell.backgroundColor = kColor(251, 251, 251);
+        cell.backgroundColor = KColor(251, 251, 251);
     }
     return cell;
 }
@@ -135,7 +135,7 @@
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
-    if (!kArrayEmpty(_bookBorrowArr)) {
+    if (!KArrayEmpty(_bookBorrowArr)) {
         return 27;
     }
     return 0;
@@ -143,9 +143,9 @@
 
 - (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section {
     UIView *headerView = [[UIView alloc] init];
-    headerView.backgroundColor = kColor(251, 251, 251);
+    headerView.backgroundColor = KColor(251, 251, 251);
     headerView.layer.borderWidth = 0.5;
-    headerView.layer.borderColor = [kColor(203, 214, 226) CGColor];
+    headerView.layer.borderColor = [KColor(203, 214, 226) CGColor];
     
     UILabel *countTitle = [[UILabel alloc] initWithFrame:CGRectMake(0, 3, 75, 21)];
     countTitle.font = [UIFont systemFontOfSize:15.0];
@@ -186,7 +186,7 @@
 
 - (void)refreshView:(UIRefreshControl *)sender {
     sender.attributedTitle = [[NSAttributedString alloc] initWithString:@"刷新中..."];
-    if ([userDefaults boolForKey:_K_MODE_OFFLINE]) {
+    if ([KUserDefaults boolForKey:KModeOffline]) {
         NSLog(@"图书借阅-离线模式");
         [self refreshBookBorrow];
     } else {

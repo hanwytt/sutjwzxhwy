@@ -7,7 +7,7 @@
 //
 
 #import "HWYReportCardTableViewCell.h"
-#import "HWYGeneralConfig.h"
+#import "HWYAppDefine.h"
 
 @implementation HWYReportCardTableViewCell
 
@@ -30,7 +30,7 @@
         self.layoutMargins = UIEdgeInsetsZero;
         
         UIView *selectView = [[UIView alloc] initWithFrame:self.frame];
-        selectView.backgroundColor = _K_CELL_SELECTED_COLOR;
+        selectView.backgroundColor = KCellSelectedColor;
         self.selectedBackgroundView = selectView;
         
         _courseName = [[UILabel alloc] initWithFrame:CGRectMake(5, 3, 265, 21)];

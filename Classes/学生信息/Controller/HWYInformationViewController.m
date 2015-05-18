@@ -12,8 +12,8 @@
 #import "HWYNetworking.h"
 #import "HWYAppDelegate.h"
 #import "MBProgressHUD.h"
-#import "UIKit+AFNetworking.h"
-#import "HWYGeneralConfig.h"
+#import "UIImage+Extension.h"
+#import "HWYAppDefine.h"
 #import "HWYURLConfig.h"
 
 @interface HWYInformationViewController () {
@@ -54,7 +54,7 @@
 
 - (void)initNavBar {
     [self configTitleAndLeftItem:@"学生信息"];
-    if (![userDefaults boolForKey:_K_MODE_OFFLINE]) {
+    if (![KUserDefaults boolForKey:KModeOffline]) {
         UIBarButtonItem *rightItem = [[UIBarButtonItem alloc] initWithTitle:@"网页版" style:UIBarButtonItemStylePlain target:self action:@selector(rightItemClick:)];
         rightItem.tintColor = [UIColor whiteColor];
         [self.navigationItem setRightBarButtonItem:rightItem];
@@ -167,7 +167,7 @@
 }
 
 - (void)initInfo {
-    NSString *number = [userDefaults valueForKey:_K_DEFAULT_NUMBER];
+    NSString *number = [KUserDefaults valueForKey:KDefaultNumber];
     _info = [HWYInformationData getInformationData:number];
     if (_info) {
         _contentView.hidden = NO;
@@ -197,7 +197,7 @@
     hud.removeFromSuperViewOnHide = YES;
     [self.view addSubview:hud];
     [hud show:YES];
-    if ([userDefaults boolForKey:_K_MODE_OFFLINE]) {
+    if ([KUserDefaults boolForKey:KModeOffline]) {
         NSLog(@"学生信息-离线模式");
         [self performSelector:@selector(initInfo) withObject:nil afterDelay:0.5];
         [hud hide:YES afterDelay:0.5];
@@ -218,45 +218,31 @@
 }
 
 - (void)requestInfoImage {
-    MBProgressHUD *hud = [[MBProgressHUD alloc] initWithView:_imageView];
+    MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:_imageView animated:YES];
     hud.margin = 3.0;
-    hud.mode = MBProgressHUDModeIndeterminate;
-    hud.removeFromSuperViewOnHide = YES;
-    [_imageView addSubview:hud];
-    [hud show:YES];
-    if ([userDefaults boolForKey:_K_MODE_OFFLINE]) {
+    if ([KUserDefaults boolForKey:KModeOffline]) {
         NSLog(@"学生头像-离线模式");
-        [self performSelector:@selector(initInfoImage) withObject:nil afterDelay:0.5];
-        [hud hide:YES afterDelay:0.5];
+        [hud hideHUDDefaultDelay:^{
+            [self initInfoImage];
+        }];
     } else {
         NSLog(@"学生头像-正常模式");
         NSString *number = _info.number;
         NSString *string = [NSString stringWithFormat:JWZX_INFO_IMAGE_URL, number];
         NSURL *url = [NSURL URLWithString:string];
-        NSURLRequest *requst = [NSURLRequest requestWithURL:url];
-        __block UIImageView *tempImageView = _imageView;
-        [_imageView setImageWithURLRequest:requst placeholderImage:nil success:^(NSURLRequest *request, NSHTTPURLResponse *response, UIImage *image) {
-            NSData *imageData = nil;
-            if (UIImagePNGRepresentation(image) == nil) {
-                imageData = UIImageJPEGRepresentation(image, 1);
-            } else {
-                imageData = UIImagePNGRepresentation(image);
-            }
-            [HWYInformationData saveInfoImageData:imageData number:number];
-            tempImageView.bounds = CGRectMake(0, 0, image.size.width*2, image.size.height*2);
-            [tempImageView setImage:image];
+        [UIImage imageWithUrl:url success:^(NSData *data, UIImage *image) {
+            [_imageView setImage:image];
+            [HWYInformationData saveInfoImageData:data number:number];
             [hud hide:YES];
-        } failure:^(NSURLRequest *request, NSHTTPURLResponse *response, NSError *error) {
-            NSData *imageData = [HWYInformationData getInfoImageData:[userDefaults valueForKey:_K_DEFAULT_NUMBER]];
-            UIImage *image = [UIImage imageWithData:imageData];
-            [tempImageView setImage:image];
+        } failure:^{
             [hud hide:YES];
+            [self initInfoImage];
         }];
     }
 }
 
 - (void)initInfoImage {
-    NSString *number = [userDefaults valueForKey:_K_DEFAULT_NUMBER];
+    NSString *number = [KUserDefaults valueForKey:KDefaultNumber];
     _info.imageData = [HWYInformationData getInfoImageData:number];
     UIImage *image = [UIImage imageWithData:_info.imageData];
     [_imageView setImage:image];

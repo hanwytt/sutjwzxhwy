@@ -8,7 +8,7 @@
 
 #import "HWYLoginSzgdData.h"
 #import "HWYAnalysisHtml.h"
-#import "HWYGeneralConfig.h"
+#import "HWYAppDefine.h"
 #import "FMDB.h"
 
 @implementation HWYLoginSzgdData
@@ -22,7 +22,7 @@
 }
 
 + (void)saveLoginSzgdData:(NSString *)name password:(NSString *)password {
-    NSString *dbpath = [DocumentsDirectory stringByAppendingPathComponent:_K_DATABASE];
+    NSString *dbpath = [KDocumentsDirectory stringByAppendingPathComponent:KDatabase];
     FMDatabase* db = [FMDatabase databaseWithPath:dbpath];
     if (![db open]) {
         NSLog(@"Could not open db.");
@@ -38,7 +38,7 @@
 }
 
 + (NSString *)getLoginSzgdPassword:(NSString *)name {
-    NSString *dbpath = [DocumentsDirectory stringByAppendingPathComponent:_K_DATABASE];
+    NSString *dbpath = [KDocumentsDirectory stringByAppendingPathComponent:KDatabase];
     FMDatabase* db = [FMDatabase databaseWithPath:dbpath];
     if (![db open]) {
         NSLog(@"Could not open db.");

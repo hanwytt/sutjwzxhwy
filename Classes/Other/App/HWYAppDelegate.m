@@ -9,7 +9,7 @@
 #import "HWYAppDelegate.h"
 #import "Reachability.h"
 #import "HWYMainViewController.h"
-#import "HWYGeneralConfig.h"
+#import "HWYAppDefine.h"
 #import "FMDB.h"
 
 @interface HWYAppDelegate ()
@@ -37,9 +37,9 @@
 }
 
 - (void)isFirstLaunch {
-    if (![userDefaults boolForKey:@"firstLaunch"]) {
-        [userDefaults setBool:YES forKey:@"firstLaunch"];
-        [userDefaults synchronize];
+    if (![KUserDefaults boolForKey:KFirstLaunch]) {
+        [KUserDefaults setBool:YES forKey:KFirstLaunch];
+        [KUserDefaults synchronize];
         [self initDatabase];
         [self initData];
         NSLog(@"YES");
@@ -47,7 +47,7 @@
 }
 
 - (void)initDatabase {
-    NSString *dbpath = [DocumentsDirectory stringByAppendingPathComponent:_K_DATABASE];
+    NSString *dbpath = [KDocumentsDirectory stringByAppendingPathComponent:KDatabase];
     NSLog(@"%@", dbpath);
     FMDatabase* db = [FMDatabase databaseWithPath:dbpath];
     if (![db open]) {
@@ -82,11 +82,11 @@
 }
 
 - (void)initData {
-    [userDefaults setBool:NO forKey:_K_MODE_OFFLINE];
-    [userDefaults setBool:NO forKey:_K_MODE_REMEMb];
-    [userDefaults setBool:NO forKey:_K_MODE_AUTOIDENTIFICATION];
-    [userDefaults setValue:@"" forKey:_K_DEFAULT_NUMBER];
-    [userDefaults synchronize];
+    [KUserDefaults setBool:NO forKey:KModeOffline];
+    [KUserDefaults setBool:NO forKey:KModeRememb];
+    [KUserDefaults setBool:NO forKey:KModeAutoIdentification];
+    [KUserDefaults setValue:@"" forKey:KDefaultNumber];
+    [KUserDefaults synchronize];
 }
 
 + (HWYAppDelegate *)shareDelegate
