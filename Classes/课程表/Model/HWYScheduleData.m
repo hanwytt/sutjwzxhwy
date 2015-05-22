@@ -42,6 +42,14 @@
         NSLog(@"Could not open db.");
         return ;
     }
+    
+    NSString *jwzx_schedule = @"CREATE TABLE IF NOT EXISTS jwzx_schedule (number VARCHAR NOT NULL REFERENCES jwzx_szgd_login (number), semester VARCHAR NOT NULL, week INTEGER NOT NULL, section INTEGER NOT NULL, courseId VARCHAR, course VARCHAR, teacher VARCHAR, schooltime VARCHAR, timedesc VARCHAR, room VARCHAR, PRIMARY KEY (number,semester,week,section))";
+    BOOL result = [db executeUpdate:jwzx_schedule];
+    if (!result) {
+        NSLog(@"Could create table.");
+        return;
+    }
+    
     NSString *number = [KUserDefaults valueForKey:KDefaultNumber];
     for (HWYScheduleData *schedule in arr) {
         FMResultSet *rs = [db executeQuery:@"SELECT * FROM jwzx_schedule where number = ? and semester = ? and week = ? and section = ?", number, schedule.semester, [NSNumber numberWithInteger:schedule.week], [NSNumber numberWithInteger:schedule.section]];
@@ -64,12 +72,14 @@
         }
         [scheduleArr addObject:arr];
     }
+    
     NSString *dbpath = [KDocumentsDirectory stringByAppendingPathComponent:KDatabase];
     FMDatabase* db = [FMDatabase databaseWithPath:dbpath];
     if (![db open]) {
         NSLog(@"Could not open db.");
         return nil;
     }
+    
     NSString *number = [KUserDefaults valueForKey:KDefaultNumber];
     FMResultSet *rs = [db executeQuery:@"SELECT * FROM jwzx_schedule where number = ? and semester = ?", number, semester];
     while ([rs next]) {

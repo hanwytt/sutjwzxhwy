@@ -270,7 +270,7 @@
 }
 
 - (void)logoutBtnClick:(UIButton *)sender {
-    UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:@"确定" otherButtonTitles:nil, nil];
+    UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:@"确认退出登录？" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:@"确定" otherButtonTitles:nil, nil];
     actionSheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
     [actionSheet showInView:self.view];
 }

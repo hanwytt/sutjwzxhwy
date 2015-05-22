@@ -32,6 +32,14 @@
         NSLog(@"Could not open db.");
         return ;
     }
+    
+    NSString *szgd_onecard_balance = @"CREATE TABLE IF NOT EXISTS szgd_onecard_balance (XH VARCHAR PRIMARY KEY NOT NULL REFERENCES jwzx_szgd_login (number), YKT VARCHAR, YE VARCHAR, ZYXF VARCHAR, JRXF VARCHAR, CARD_ID VARCHAR)";
+    BOOL result = [db executeUpdate:szgd_onecard_balance];
+    if (!result) {
+        NSLog(@"Could create table.");
+        return;
+    }
+    
     FMResultSet *rs = [db executeQuery:@"SELECT * FROM szgd_onecard_balance where XH = ?", oneCardBalance.XH];
     if ([rs next]) {
         [db executeUpdate:@"update szgd_onecard_balance set YKT = ?, YE = ?,ZYXF = ?, JRXF = ?, CARD_ID = ? where XH = ?", oneCardBalance.YKT, oneCardBalance.YE, oneCardBalance.ZYXF, oneCardBalance.JRXF, oneCardBalance.CARD_ID, oneCardBalance.XH];
@@ -48,6 +56,7 @@
         NSLog(@"Could not open db.");
         return nil;
     }
+    
     NSString *number = [KUserDefaults valueForKey:KDefaultNumber];
     FMResultSet *rs = [db executeQuery:@"SELECT * FROM szgd_onecard_balance where XH = ?", number];
     HWYOneCardBalanceData *oneCardBalance = [HWYOneCardBalanceData new];
@@ -109,6 +118,14 @@
         NSLog(@"Could not open db.");
         return ;
     }
+    
+    NSString *szgd_onecard_record = @"CREATE TABLE IF NOT EXISTS szgd_onecard_record (XH VARCHAR NOT NULL REFERENCES jwzx_szgd_login (number), YKT VARCHAR, JE VARCHAR, ZDMC VARCHAR, time VARCHAR, CARD_ID VARCHAR NOT NULL, PRIMARY KEY (XH,CARD_ID))";
+    BOOL result = [db executeUpdate:szgd_onecard_record];
+    if (!result) {
+        NSLog(@"Could create table.");
+        return;
+    }
+    
     for (HWYOneCardRecordData *oneCardRecord in arr) {
         FMResultSet *rs = [db executeQuery:@"SELECT * FROM szgd_onecard_record where XH = ? and CARD_ID = ?", oneCardRecord.XH, oneCardRecord.CARD_ID];
         if ([rs next]) {
@@ -127,6 +144,7 @@
         NSLog(@"Could not open db.");
         return nil;
     }
+    
     NSString *number = [KUserDefaults valueForKey:KDefaultNumber];
     FMResultSet *rs = [db executeQuery:@"SELECT * FROM szgd_onecard_record where XH = ? order by time desc", number];
     NSMutableArray *oneCardRecordArr = [NSMutableArray array];

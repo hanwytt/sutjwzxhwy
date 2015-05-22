@@ -43,6 +43,14 @@
         NSLog(@"Could not open db.");
         return ;
     }
+    
+    NSString *news_info = @"CREATE TABLE IF NOT EXISTS news_info (RESOURCE_ID VARCHAR PRIMARY KEY NOT NULL, SCOPE_ID VARCHAR, UNIT_NAME VARCHAR, AUDIT_TIME VARCHAR, PLATE_ID VARCHAR, PLATE_NAME VARCHAR, TITLE VARCHAR, VIEW_COUNT VARCHAR, IS_TOP BOOLEAN, IS_IMPORTANT BOOLEAN, NEWS_EDITOR VARCHAR,USER_NAME VARCHAR, NEWS_REPORTER VARCHAR, CONTENT VARCHAR)";
+    BOOL result = [db executeUpdate:news_info];
+    if (!result) {
+        NSLog(@"Could create table.");
+        return;
+    }
+    
     for (HWYNewsInfoData *newsInfo in arr) {
         FMResultSet *rs = [db executeQuery:@"SELECT * FROM news_info where RESOURCE_ID = ?", newsInfo.RESOURCE_ID];
         if ([rs next]) {

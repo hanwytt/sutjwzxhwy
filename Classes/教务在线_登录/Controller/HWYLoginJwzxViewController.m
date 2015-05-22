@@ -17,8 +17,6 @@
 #import "HWYAppDefine.h"
 #import "HWYURLConfig.h"
 
-#import "HWYNetworking.h"
-
 @interface HWYLoginJwzxViewController () <UITextFieldDelegate> {
     HWYLoginJwzxData *_jwzx;
 }
@@ -185,13 +183,16 @@
     NSString *agnomen = _agnomenField.text;
     
     if (!KStringExist(number)) {
-        [MBProgressHUD showInfo:@"请输入用户名" toView:self.view];
+        UIAlertView *alter = [[UIAlertView alloc] initWithTitle:@"温馨提示" message:@"请输入账号" delegate:self cancelButtonTitle:@"确定" otherButtonTitles:nil];
+        [alter show];
         return;
     } else if (!KStringExist(password)) {
-        [MBProgressHUD showInfo:@"请输入密码" toView:self.view];
+        UIAlertView *alter = [[UIAlertView alloc] initWithTitle:@"温馨提示" message:@"请输入密码" delegate:self cancelButtonTitle:@"确定" otherButtonTitles:nil];
+        [alter show];
         return;
     } else if (!KStringExist(agnomen)) {
-        [MBProgressHUD showInfo:@"请输入验证码" toView:self.view];
+        UIAlertView *alter = [[UIAlertView alloc] initWithTitle:@"温馨提示" message:@"请输入验证码" delegate:self cancelButtonTitle:@"确定" otherButtonTitles:nil];
+        [alter show];
         return;
     }
     

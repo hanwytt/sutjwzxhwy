@@ -457,9 +457,6 @@
         NSLog(@"%@",error);
         block(error);
     }];
-    
 }
-
-
 
 @end

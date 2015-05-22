@@ -43,6 +43,14 @@
         NSLog(@"Could not open db.");
         return;
     }
+    
+    NSString *news_info = @"CREATE TABLE IF NOT EXISTS news_info (RESOURCE_ID VARCHAR PRIMARY KEY NOT NULL, SCOPE_ID VARCHAR, UNIT_NAME VARCHAR, AUDIT_TIME VARCHAR, PLATE_ID VARCHAR, PLATE_NAME VARCHAR, TITLE VARCHAR, VIEW_COUNT VARCHAR, IS_TOP BOOLEAN, IS_IMPORTANT BOOLEAN, NEWS_EDITOR VARCHAR,USER_NAME VARCHAR, NEWS_REPORTER VARCHAR, CONTENT VARCHAR)";
+    BOOL result = [db executeUpdate:news_info];
+    if (!result) {
+        NSLog(@"Could create table.");
+        return;
+    }
+    
     FMResultSet *rs = [db executeQuery:@"SELECT * FROM news_info where RESOURCE_ID = ?", newsInfoDetail.RESOURCE_ID];
     if ([rs next]) {
         [db executeUpdate:@"update news_info set NEWS_EDITOR = ?, UNIT_NAME = ?, AUDIT_TIME = ?, PLATE_NAME = ?, CONTENT = ?, USER_NAME = ?, NEWS_REPORTER = ?, TITLE = ?, VIEW_COUNT = ?, IS_TOP = ?, IS_IMPORTANT = ? where RESOURCE_ID = ?", newsInfoDetail.NEWS_EDITOR, newsInfoDetail.UNIT_NAME, newsInfoDetail.AUDIT_TIME, newsInfoDetail.PLATE_NAME, newsInfoDetail.CONTENT, newsInfoDetail.USER_NAME, newsInfoDetail.NEWS_REPORTER, newsInfoDetail.TITLE, newsInfoDetail.VIEW_COUNT,[NSNumber numberWithBool:newsInfoDetail.IS_TOP], [NSNumber numberWithBool:newsInfoDetail.IS_IMPORTANT], newsInfoDetail.RESOURCE_ID];
@@ -59,6 +67,7 @@
         NSLog(@"Could not open db.");
         return nil;
     }
+    
     FMResultSet *rs = [db executeQuery:@"SELECT * FROM news_info where RESOURCE_ID = ?", resourceid];
     HWYNewsInfoDetailData *newsInfoDetail = [HWYNewsInfoDetailData new];
     if ([rs next]) {

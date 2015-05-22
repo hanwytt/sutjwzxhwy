@@ -34,7 +34,15 @@
         NSLog(@"Could not open db.");
         return ;
     }
-     NSString *number = [KUserDefaults valueForKey:KDefaultNumber];
+    
+    NSString *szgd_bookborrow = @"CREATE TABLE IF NOT EXISTS szgd_bookborrow (number VARCHAR NOT NULL REFERENCES jwzx_szgd_login (number), propNo VARCHAR NOT NULL, mTitle VARCHAR, mAuthor VARCHAR, lendDate VARCHAR, normRetDate VARCHAR, PRIMARY KEY (number,propNo))";
+    BOOL result = [db executeUpdate:szgd_bookborrow];
+    if (!result) {
+        NSLog(@"Could create table.");
+        return;
+    }
+    
+    NSString *number = [KUserDefaults valueForKey:KDefaultNumber];
     FMResultSet *rs = [db executeQuery:@"SELECT * FROM szgd_bookborrow where number = ?", number];
     if ([rs next]) {
         [db executeUpdate:@"delete from szgd_bookborrow where number = ?", number];
@@ -57,6 +65,7 @@
         NSLog(@"Could not open db.");
         return nil;
     }
+    
     NSString *number = [KUserDefaults valueForKey:KDefaultNumber];
     FMResultSet *rs = [db executeQuery:@"SELECT * FROM szgd_bookborrow where number = ? order by lendDate asc", number];
     NSMutableArray *bookBorrowArr = [NSMutableArray array];

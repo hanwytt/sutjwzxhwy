@@ -30,6 +30,14 @@
         NSLog(@"Could not open db.");
         return ;
     }
+    
+    NSString *jwzx_report_count = @"CREATE TABLE IF NOT EXISTS jwzx_report_count (number VARCHAR PRIMARY KEY NOT NULL REFERENCES jwzx_szgd_login (number), bxCount VARCHAR, xxCount VARCHAR, rxCount VARCHAR, stuCount VARCHAR)";
+    BOOL result = [db executeUpdate:jwzx_report_count];
+    if (!result) {
+        NSLog(@"Could create table.");
+        return;
+    }
+    
     NSString *number = [KUserDefaults valueForKey:KDefaultNumber];
     FMResultSet *rs = [db executeQuery:@"SELECT * FROM jwzx_report_count where number = ?", number];
     if ([rs next]) {
@@ -47,6 +55,7 @@
         NSLog(@"Could not open db.");
         return nil;
     }
+    
     NSString *number = [KUserDefaults valueForKey:KDefaultNumber];
     FMResultSet *rs = [db executeQuery:@"SELECT * FROM jwzx_report_count where number = ?", number];
     HWYReportCountData *reportCount = [HWYReportCountData new];
@@ -92,6 +101,14 @@
         NSLog(@"Could not open db.");
         return ;
     }
+    
+    NSString *jwzx_report_card = @"CREATE TABLE IF NOT EXISTS jwzx_report_card (number VARCHAR NOT NULL REFERENCES jwzx_szgd_login (number), courseId VARCHAR, courseName VARCHAR, semesterId VARCHAR, semester VARCHAR, period VARCHAR, credit VARCHAR, property VARCHAR, score VARCHAR, ordernum INTEGER, PRIMARY KEY (number,courseId))";
+    BOOL result = [db executeUpdate:jwzx_report_card];
+    if (!result) {
+        NSLog(@"Could create table.");
+        return;
+    }
+    
     NSString *number = [KUserDefaults valueForKey:KDefaultNumber];
     for (HWYReportCardData *reportCard in arr) {
         FMResultSet *rs = [db executeQuery:@"SELECT * FROM jwzx_report_card where number = ? and courseId = ?", number, reportCard.courseId];
@@ -111,6 +128,7 @@
         NSLog(@"Could not open db.");
         return nil;
     }
+    
     NSString *number = [KUserDefaults valueForKey:KDefaultNumber];
     FMResultSet *rs = [db executeQuery:@"SELECT * FROM jwzx_report_card where number = ? order by semesterId desc, ordernum asc", number];
     NSMutableArray *reportCardArr = [NSMutableArray array];
@@ -138,6 +156,7 @@
         NSLog(@"Could not open db.");
         return nil;
     }
+    
     NSString *number = [KUserDefaults valueForKey:KDefaultNumber];
     courseName = [NSString stringWithFormat:@"%%%@%%", courseName];
     FMResultSet *rs = [db executeQuery:@"SELECT * FROM jwzx_report_card where number = ? and courseName like ? order by semesterId desc", number, courseName];

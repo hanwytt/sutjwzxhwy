@@ -40,45 +40,9 @@
     if (![KUserDefaults boolForKey:KFirstLaunch]) {
         [KUserDefaults setBool:YES forKey:KFirstLaunch];
         [KUserDefaults synchronize];
-        [self initDatabase];
         [self initData];
         NSLog(@"YES");
     }
-}
-
-- (void)initDatabase {
-    NSString *dbpath = [KDocumentsDirectory stringByAppendingPathComponent:KDatabase];
-    NSLog(@"%@", dbpath);
-    FMDatabase* db = [FMDatabase databaseWithPath:dbpath];
-    if (![db open]) {
-        NSLog(@"Could not open db.");
-        return;
-    }
-    NSString *jwzx_szgd_login = @"CREATE TABLE jwzx_szgd_login (number VARCHAR PRIMARY KEY NOT NULL, password_jwzx VARCHAR, password_szgd VARCHAR)";
-    NSString *jwzx_info = @"CREATE TABLE jwzx_info (number VARCHAR PRIMARY KEY NOT NULL REFERENCES jwzx_szgd_login (number), name VARCHAR, sex VARCHAR, nation VARCHAR, school VARCHAR, department VARCHAR, major VARCHAR, className VARCHAR, grade VARCHAR, education VARCHAR, idCardNo VARCHAR, interval VARCHAR, imageData BLOB)";
-    NSString *jwzx_schedule = @"CREATE TABLE jwzx_schedule (number VARCHAR NOT NULL REFERENCES jwzx_szgd_login (number), semester VARCHAR NOT NULL, week INTEGER NOT NULL, section INTEGER NOT NULL, courseId VARCHAR, course VARCHAR, teacher VARCHAR, schooltime VARCHAR, timedesc VARCHAR, room VARCHAR, PRIMARY KEY (number,semester,week,section))";
-    NSString *jwzx_report_count = @"CREATE TABLE jwzx_report_count (number VARCHAR PRIMARY KEY NOT NULL REFERENCES jwzx_szgd_login (number), bxCount VARCHAR, xxCount VARCHAR, rxCount VARCHAR, stuCount VARCHAR)";
-    NSString *jwzx_report_card = @"CREATE TABLE jwzx_report_card (number VARCHAR NOT NULL REFERENCES jwzx_szgd_login (number), courseId VARCHAR, courseName VARCHAR, semesterId VARCHAR, semester VARCHAR, period VARCHAR, credit VARCHAR, property VARCHAR, score VARCHAR, ordernum INTEGER, PRIMARY KEY (number,courseId))";
-    NSString *szgd_bookborrow = @"CREATE TABLE szgd_bookborrow (number VARCHAR NOT NULL REFERENCES jwzx_szgd_login (number), propNo VARCHAR NOT NULL, mTitle VARCHAR, mAuthor VARCHAR, lendDate VARCHAR, normRetDate VARCHAR, PRIMARY KEY (number,propNo))";
-    NSString *szgd_onecard_balance = @"CREATE TABLE szgd_onecard_balance (XH VARCHAR PRIMARY KEY NOT NULL REFERENCES jwzx_szgd_login (number), YKT VARCHAR, YE VARCHAR, ZYXF VARCHAR, JRXF VARCHAR, CARD_ID VARCHAR)";
-    NSString *szgd_onecard_record = @"CREATE TABLE szgd_onecard_record (XH VARCHAR NOT NULL REFERENCES jwzx_szgd_login (number), YKT VARCHAR, JE VARCHAR, ZDMC VARCHAR, time VARCHAR, CARD_ID VARCHAR NOT NULL, PRIMARY KEY (XH,CARD_ID))";
-    NSString *news_list = @"CREATE TABLE news_list (PLATE_ID VARCHAR PRIMARY KEY NOT NULL, SCOPE_ID VARCHAR, PLATE_NAME VARCHAR)";
-    NSString *news_info = @"CREATE TABLE news_info (RESOURCE_ID VARCHAR PRIMARY KEY NOT NULL, SCOPE_ID VARCHAR, UNIT_NAME VARCHAR, AUDIT_TIME VARCHAR, PLATE_ID VARCHAR, PLATE_NAME VARCHAR, TITLE VARCHAR, VIEW_COUNT VARCHAR, IS_TOP BOOLEAN, IS_IMPORTANT BOOLEAN, NEWS_EDITOR VARCHAR,USER_NAME VARCHAR, NEWS_REPORTER VARCHAR, CONTENT VARCHAR)";
-    NSString *notice_list = @"CREATE TABLE notice_list (PLATE_ID VARCHAR PRIMARY KEY NOT NULL, SCOPE_ID VARCHAR, NAME VARCHAR)";
-    NSString *notice_info = @"CREATE TABLE notice_info (RESOURCE_ID VARCHAR PRIMARY KEY NOT NULL, SCOPE_ID VARCHAR, UNIT_NAME VARCHAR, AUDIT_TIME VARCHAR, PLATE_ID VARCHAR, PLATE_NAME VARCHAR, TITLE VARCHAR, VIEW_COUNT VARCHAR, NEWS_EDITOR VARCHAR,USER_NAME VARCHAR, NEWS_REPORTER VARCHAR, CONTENT VARCHAR)";
-    [db executeUpdate:jwzx_szgd_login];
-    [db executeUpdate:jwzx_info];
-    [db executeUpdate:jwzx_schedule];
-    [db executeUpdate:jwzx_report_count];
-    [db executeUpdate:jwzx_report_card];
-    [db executeUpdate:szgd_bookborrow];
-    [db executeUpdate:szgd_onecard_balance];
-    [db executeUpdate:szgd_onecard_record];
-    [db executeUpdate:news_list];
-    [db executeUpdate:news_info];
-    [db executeUpdate:notice_list];
-    [db executeUpdate:notice_info];
-    [db close];
 }
 
 - (void)initData {

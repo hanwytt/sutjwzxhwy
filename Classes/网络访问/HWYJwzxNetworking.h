@@ -20,6 +20,6 @@
 
 + (void)getReportCardData:(void(^)())block;
 
-+ (void)logoutJwzx:(void(^)(BOOL jwzx))block;
++ (void)logoutJwzxSuccess:(void(^)())success failure:(void(^)())failure;
 
 @end

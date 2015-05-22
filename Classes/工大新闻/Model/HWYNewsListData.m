@@ -32,6 +32,14 @@
         NSLog(@"Could not open db.");
         return ;
     }
+    
+    NSString *news_list = @"CREATE TABLE IF NOT EXISTS news_list (PLATE_ID VARCHAR PRIMARY KEY NOT NULL, SCOPE_ID VARCHAR, PLATE_NAME VARCHAR)";
+    BOOL result = [db executeUpdate:news_list];
+    if (!result) {
+        NSLog(@"Could create table.");
+        return;
+    }
+    
     for (HWYNewsListData *newList in arr) {
         FMResultSet *rs = [db executeQuery:@"SELECT * FROM news_list where PLATE_ID = ?", newList.PLATE_ID];
         if ([rs next]) {
