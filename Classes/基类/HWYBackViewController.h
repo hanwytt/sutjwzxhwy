@@ -14,4 +14,5 @@
 
 - (void)backItemClick:(UIButton *)sender;
 
+- (void)didAfterDelay:(void (^)())block;
 @end

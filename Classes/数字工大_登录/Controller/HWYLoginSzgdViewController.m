@@ -8,21 +8,17 @@
 
 #import "HWYLoginSzgdViewController.h"
 #import "HWYLoginSzgdData.h"
-#import "HWYAppDelegate.h"
+#import "HWYSzgdNetworking.h"
+#import "MBProgressHUD+MJ.h"
 #import "HWYAppDefine.h"
-#import "HWYNetworking.h"
-#import "MBProgressHUD.h"
-#import "Reachability.h"
 
 @interface HWYLoginSzgdViewController () <UITextFieldDelegate> {
-    BOOL _success;
     HWYLoginSzgdData *_szgd;
 }
 @property (strong,nonatomic) UIView *contentView;
 @property (strong,nonatomic) UITextField *nameField;
 @property (strong,nonatomic) UITextField *passwordField;
 @property (strong,nonatomic) UIButton *loginBtn;
-@property (nonatomic) Reachability *reachable;
 @property (strong,nonatomic) UIBarButtonItem * previousItem;
 @property (strong,nonatomic) UIBarButtonItem * nextItem;
 @end
@@ -34,6 +30,7 @@
     // Do any additional setup after loading the view.
     [self initNavBar];
     [self initView];
+    [self getSzgdLt];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -43,9 +40,6 @@
 
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reachableChanged:) name:kReachabilityChangedNotification object:nil];
-    _reachable = [Reachability reachabilityWithHostName:@"www.apple.com"];
-    [_reachable startNotifier];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillHidden:) name:UIKeyboardWillHideNotification object:nil];
@@ -129,155 +123,62 @@
     _szgd = [[HWYLoginSzgdData alloc] init];
 }
 
-//- (void)requestNetworking {
-//    _szgd = [[HWYLoginSzgdData alloc] init];
-//    MBProgressHUD *hud = [[MBProgressHUD alloc] initWithView:self.view];
-//    hud.labelFont = [UIFont systemFontOfSize:15.0];
-//    hud.removeFromSuperViewOnHide = YES;
-//    [self.view addSubview:hud];
-//    if ([HWYAppDelegate isReachable]) {
-//        hud.mode = MBProgressHUDModeIndeterminate;
-//        hud.labelText = @"加载中";
-//        [hud show:YES];
-//        [HWYNetworking getLoginSzgdLt:^(NSString *lt, NSError *error) {
-//            _szgd.lt = lt;
-//            [hud hide:YES];
-//        }];
-//    } else {
-//        hud.customView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_error_black"]];
-//        hud.mode = MBProgressHUDModeCustomView;
-//        hud.labelText = @"当前网络不可用";
-//        [hud show:YES];
-//        [hud hide:YES afterDelay:0.5];
-//    }
-//}
-
-- (void)reachableChanged:(NSNotification*)note {
-    Reachability *curReach = [note object];
-    NSParameterAssert([curReach isKindOfClass: [Reachability class]]);
-    NetworkStatus status = [curReach currentReachabilityStatus];
-    MBProgressHUD *hud = [[MBProgressHUD alloc] initWithView:self.view];
-    hud.labelFont = [UIFont systemFontOfSize:15.0];
-    hud.removeFromSuperViewOnHide = YES;
-    [self.view addSubview:hud];
-    switch (status) {
-        case NotReachable:
-            hud.customView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_error_black"]];
-            hud.mode = MBProgressHUDModeCustomView;
-            hud.labelText = @"当前网络不可用";
-            [hud show:YES];
-            [hud hide:YES afterDelay:0.5];
-            break;
-        case ReachableViaWWAN:
-        case ReachableViaWiFi:
-        {
-            hud.mode = MBProgressHUDModeIndeterminate;
-            hud.labelText = @"加载中";
-            [hud show:YES];
-            [HWYNetworking getLoginSzgdLt:^(BOOL success, NSString *lt, NSError *error) {
-                _szgd.lt = lt;
-                _success = success;
-                if (_success) {
-                    [hud hide:YES];
-                } else {
-                    hud.customView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_error_black"]];
-                    hud.labelText = @"加载失败";
-                    [hud hide:YES afterDelay:0.5];
-                }
-            }];
-        }
-            break;
-        default:
-            break;
-    }
+- (void)getSzgdLt {
+    MBProgressHUD *hud = [MBProgressHUD showMessage:@"加载中..." toView:self.view];
+    [HWYSzgdNetworking getLoginSzgdLt:^(NSString *lt) {
+        [hud hide:YES];
+        _szgd.lt = lt;
+    }];
 }
 
 - (void)loginBtnClick:(UIButton *)sender {
     [self doneItemClick:nil];
-    MBProgressHUD *hud = [[MBProgressHUD alloc] initWithView:self.view];
-    hud.labelFont = [UIFont systemFontOfSize:15.0];
-    hud.removeFromSuperViewOnHide = YES;
-    [self.view addSubview:hud];
-    if ([HWYAppDelegate isReachable]) {
-        hud.mode = MBProgressHUDModeIndeterminate;
-        hud.labelText = @"登录中";
-        [hud show:YES];
-        if (_success) {
+    
+    NSString *number = _nameField.text;
+    NSString *password = _passwordField.text;
+    
+    if (!KStringExist(number)) {
+        UIAlertView *alter = [[UIAlertView alloc] initWithTitle:@"温馨提示" message:@"请输入账号" delegate:self cancelButtonTitle:@"确定" otherButtonTitles:nil];
+        [alter show];
+        return;
+    } else if (!KStringExist(password)) {
+        UIAlertView *alter = [[UIAlertView alloc] initWithTitle:@"温馨提示" message:@"请输入密码" delegate:self cancelButtonTitle:@"确定" otherButtonTitles:nil];
+        [alter show];
+        return;
+    } else if (!KStringExist(_szgd.lt)) {
+        MBProgressHUD *hud = [MBProgressHUD showMessage:@"登录中..." toView:self.view];
+        [HWYSzgdNetworking getLoginSzgdLt:^(NSString *lt) {
             [hud hide:YES];
+            _szgd.lt = lt;
             [self loginSzgd];
-        } else {
-            [HWYNetworking getLoginSzgdLt:^(BOOL success, NSString *lt, NSError *error) {
-                _szgd.lt = lt;
-                _success = success;
-                if (_success) {
-                    [hud hide:YES];
-                    [self loginSzgd];
-                } else {
-                    hud.customView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_error_black"]];
-                    hud.labelText = @"登录失败";
-                    [hud hide:YES afterDelay:0.5];
-                }
-            }];
-        }
-    } else {
-        hud.customView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_error_black"]];
-        hud.mode = MBProgressHUDModeCustomView;
-        hud.labelText = @"当前网络不可用";
-        [hud show:YES];
-        [hud hide:YES afterDelay:0.5];
+        }];
     }
+    [self loginSzgd];
 }
 
 - (void)loginSzgd {
-    MBProgressHUD *hud = [[MBProgressHUD alloc] initWithView:self.view];
-    hud.labelFont = [UIFont systemFontOfSize:15.0];
-    hud.removeFromSuperViewOnHide = YES;
-    [self.view addSubview:hud];
-    hud.mode = MBProgressHUDModeIndeterminate;
-    hud.labelText = @"登录中";
-    [hud show:YES];
-    [HWYNetworking getLoginSzgdData:_nameField.text password:_passwordField.text lt:_szgd.lt compelet:^(BOOL success, HWYLoginSzgdData *szgd, NSError *error) {
-        _success = success;
+    MBProgressHUD *hud = [MBProgressHUD showMessage:@"登录中..." toView:self.view];
+    [HWYSzgdNetworking getLoginSzgdData:_nameField.text password:_passwordField.text lt:_szgd.lt compelet:^(HWYLoginSzgdData *szgd) {
         _szgd = szgd;
-        if (_success) {
-            if (_szgd.success) {
-                [HWYNetworking getLoginSzgdJump:_szgd.href compelet:^(BOOL success, NSError *error) {
-                    _success = success;
-                    if (_success) {
-                        hud.customView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_success_black"]];
-                        hud.mode = MBProgressHUDModeCustomView;
-                        hud.labelText = @"登录成功";
-                        [self performSelector:@selector(dismiss) withObject:nil afterDelay:0.5];
-                        [hud hide:YES afterDelay:0.5];
-                        if (![_nameField.text isEqualToString:[KUserDefaults valueForKey:KDefaultNumber]]) {
-                            [KUserDefaults setObject:_nameField.text forKey:KDefaultNumber];
-                            [KUserDefaults synchronize];
-                        }
-                        [HWYLoginSzgdData saveLoginSzgdData:_nameField.text password:_passwordField.text];
-                    } else {
-                        hud.customView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_error_black"]];
-                        hud.mode = MBProgressHUDModeCustomView;
-                        hud.labelText = @"登录失败";
-                        [hud hide:YES afterDelay:0.5];
-                    }
+        if (_szgd.success) {
+            [HWYSzgdNetworking getLoginSzgdJump:_szgd.href success:^{
+                [hud hide:YES];
+                [MBProgressHUD showSuccess:@"登录成功" toView:self.view];
+                if (![_nameField.text isEqualToString:[KUserDefaults valueForKey:KDefaultNumber]]) {
+                    [KUserDefaults setObject:_nameField.text forKey:KDefaultNumber];
+                    [KUserDefaults synchronize];
+                }
+                [HWYLoginSzgdData saveLoginSzgdData:_nameField.text password:_passwordField.text];
+                [self didAfterDelay:^{
+                    [self dismiss];
                 }];
-            } else if (_szgd.lt == nil) {
-                _success = NO;
-                hud.customView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_error_black"]];
-                hud.mode = MBProgressHUDModeCustomView;
-                hud.labelText = @"登录失败";
-                [hud hide:YES afterDelay:0.5];
-            } else {
-                hud.customView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_error_black"]];
-                hud.mode = MBProgressHUDModeCustomView;
-                hud.labelText = @"错误的用户名或密码";
-                [hud hide:YES afterDelay:0.5];
-            }
+            } failure:^{
+                [hud hide:YES];
+                [MBProgressHUD showSuccess:@"用户名或密码的错误" toView:self.view];
+            }];
         } else {
-            hud.customView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_error_black"]];
-            hud.mode = MBProgressHUDModeCustomView;
-            hud.labelText = @"登录失败";
-            [hud hide:YES afterDelay:0.5];
+            [hud hide:YES];
+            [MBProgressHUD showSuccess:@"用户名或密码的错误" toView:self.view];
         }
     }];
 }
@@ -340,7 +241,6 @@
 
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:YES];
-    [_reachable stopNotifier];
     [[NSNotificationCenter defaultCenter] removeObserver:nil];
 }
 /*

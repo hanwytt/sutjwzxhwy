@@ -140,7 +140,7 @@ static CGFloat range = P_WIDTH/2 - 70 + P_WIDTH * 0.8 * 0.5;
     cell.layoutMargins = UIEdgeInsetsMake(0, 50, 0, 0);
     cell.textLabel.textColor = [UIColor whiteColor];
     cell.textLabel.font = [UIFont systemFontOfSize:18.0];
-    HWYMenuData *menu = _menuArr[indexPath.row];
+    HWYMenuData *menu = self.menuArr[indexPath.row];
     cell.textLabel.text = menu.title;
     NSString *iconStr = [NSString string];
     if (_currentRow == indexPath.row) {
@@ -298,7 +298,7 @@ static CGFloat range = P_WIDTH/2 - 70 + P_WIDTH * 0.8 * 0.5;
 
 - (void)loginBtnClick:(UIButton *)sender {
     if ([KUserDefaults boolForKey:KModeOffline]) {
-        if (!_offLine) {
+        if (!(_offLine | _jwzx | _szgd)) {
             HWYLoginOffLineViewController *offLine = [[HWYLoginOffLineViewController alloc] init];
             offLine.delegate = self;
             HWYNavigationController *nav = [[HWYNavigationController alloc] initWithRootViewController:offLine];

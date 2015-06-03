@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<array>
+	<string>2008-2009学年第一学期</string>
+	<string>2008-2009学年第二学期</string>
+	<string>2009-2010学年第一学期</string>
+	<string>2009-2010学年第二学期</string>
+	<string>2010-2011学年第一学期</string>
+	<string>2010-2011学年第二学期</string>
+	<string>2011-2012学年第一学期</string>
+	<string>2011-2012学年第二学期</string>
+	<string>2012-2013学年第一学期</string>
+	<string>2012-2013学年第二学期</string>
+	<string>2013-2014学年第一学期</string>
+	<string>2013-2014学年第二学期</string>
+	<string>2014-2015学年第一学期</string>
+	<string>2014-2015学年第二学期</string>
+	<string>2015-2016学年第一学期</string>
+	<string>2015-2016学年第二学期</string>
+</array>
+</plist>

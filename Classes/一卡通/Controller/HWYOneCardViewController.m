@@ -8,11 +8,11 @@
 
 #import "HWYOneCardViewController.h"
 #import "HWYOneCardTableViewCell.h"
-#import "HWYAppDefine.h"
 #import "HWYOneCardData.h"
-#import "HWYNetworking.h"
-#import "MBProgressHUD.h"
-#import "HWYAppDelegate.h"
+#import "HWYSzgdNetworking.h"
+#import "MBProgressHUD+MJ.h"
+#import "HWYAppDefine.h"
+#import "MJRefresh.h"
 
 
 @interface HWYOneCardViewController () <UITableViewDataSource,UITableViewDelegate> {
@@ -22,7 +22,6 @@
 }
 
 @property (strong, nonatomic) UITableView *tableView;
-@property (strong, nonatomic) UIRefreshControl *refreshControl;
 
 @end
 
@@ -57,49 +56,58 @@
     _identify = @"OneCardCell";
     [_tableView registerClass:[HWYOneCardTableViewCell class] forCellReuseIdentifier:_identify];
     [self.view addSubview:_tableView];
-    [self addRefreshControl];
-}
-
-- (void)addRefreshControl {
-    _refreshControl = [[UIRefreshControl alloc] init];
-    _refreshControl.attributedTitle = [[NSAttributedString alloc] initWithString:@"下拉刷新"];
-    [_refreshControl addTarget:self action:@selector(refreshView:) forControlEvents:UIControlEventValueChanged];
-    [_tableView addSubview:_refreshControl];
+    
+    __weak typeof(self) weakSelf = self;
+    [_tableView addLegendHeaderWithRefreshingBlock:^{
+        [weakSelf refreshTableView];
+    }];
 }
 
 - (void)initOneCard {
     _oneCardBalance = [HWYOneCardBalanceData getOneCardBalanceData];
     _oneCardRecordArr = [HWYOneCardRecordData getOneCardRecordData];
+    if (KArrayEmpty(_oneCardRecordArr)) {
+        [MBProgressHUD showInfo:@"无近三个月消费记录" toView:self.view];
+    }
     [_tableView reloadData];
+    if ([_tableView.header isRefreshing]) {
+        [_tableView.header endRefreshing];
+    }
 }
 
 - (void)requestNetworking {
-    MBProgressHUD *hud = [[MBProgressHUD alloc] initWithView:self.view];
-    hud.labelFont = [UIFont systemFontOfSize:15.0];
-    hud.mode = MBProgressHUDModeIndeterminate;
-    hud.labelText = @"加载中";
-    hud.removeFromSuperViewOnHide = YES;
-    [self.view addSubview:hud];
-    [hud show:YES];
+    MBProgressHUD *hud = [MBProgressHUD showMessage:@"加载中..." toView:self.view];
     if ([KUserDefaults boolForKey:KModeOffline]) {
         NSLog(@"一卡通-离线模式");
-        [self performSelector:@selector(initOneCard) withObject:nil afterDelay:0.5];
-        [hud hide:YES afterDelay:0.5];
+        [self didAfterDelay:^{
+            [self initOneCard];
+            [hud hide:YES];
+        }];
     } else {
-        if ([HWYAppDelegate isReachable]) {
-            [HWYNetworking getOneCardBalanceData:^(NSError *error) {
-                NSLog(@"一卡通-正常模式");
-                [HWYNetworking getOneCardRecordData:^(NSError *error) {
-                    [self initOneCard];
-                    [hud hide:YES];
-                }];
+        NSLog(@"一卡通-正常模式");
+        [HWYSzgdNetworking getOneCardBalanceData:^{
+            [HWYSzgdNetworking getOneCardRecordData:^{
+                [self initOneCard];
+                [hud hide:YES];
             }];
-        } else {
-            hud.customView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_error_black"]];
-            hud.mode = MBProgressHUDModeCustomView;
-            hud.labelText = @"当前网络不可用";
-            [hud hide:YES afterDelay:0.5];
-        }
+        }];
+    }
+}
+
+- (void)refreshTableView {
+    if ([KUserDefaults boolForKey:KModeOffline]) {
+        NSLog(@"一卡通-离线模式");
+        [self didAfterDelay:^{
+            [self initOneCard];
+        }];
+    } else {
+        NSLog(@"一卡通-正常模式");
+        [HWYSzgdNetworking getOneCardBalanceData:^{
+            [HWYSzgdNetworking getOneCardRecordData:^{
+                [self initOneCard];
+            }];
+        }];
+
     }
 }
 
@@ -127,10 +135,7 @@
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
-    if (!KArrayEmpty(_oneCardRecordArr)) {
-        return 48;
-    }
-    return 0;
+    return 48;
 }
 
 - (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section {
@@ -175,54 +180,6 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     [tableView deselectRowAtIndexPath:[tableView indexPathForSelectedRow] animated:YES];
-}
-
-- (void)refreshOneCard {
-    [self initOneCard];
-    _refreshControl.attributedTitle = [[NSAttributedString alloc] initWithString:@"刷新成功"];
-    [self performSelector:@selector(endRefreshing) withObject:nil afterDelay:0.3];
-}
-
-- (void)refreshToFail {
-    _refreshControl.attributedTitle = [[NSAttributedString alloc] initWithString:@"刷新失败"];
-    [self performSelector:@selector(endRefreshing) withObject:nil afterDelay:0.3];
-    MBProgressHUD *hud = [[MBProgressHUD alloc] initWithView:self.view];
-    hud.labelFont = [UIFont systemFontOfSize:15.0];
-    hud.customView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_error_black"]];
-    hud.mode = MBProgressHUDModeCustomView;
-    hud.labelText = @"当前网络不可用";
-    hud.removeFromSuperViewOnHide = YES;
-    [self.view addSubview:hud];
-    [hud show:YES];
-    [hud hide:YES afterDelay:0.5];
-}
-
-- (void)refreshView:(UIRefreshControl *)sender {
-    sender.attributedTitle = [[NSAttributedString alloc] initWithString:@"刷新中..."];
-    if ([KUserDefaults boolForKey:KModeOffline]) {
-        NSLog(@"一卡通-离线模式");
-        [self refreshOneCard];
-    } else {
-        if ([HWYAppDelegate isReachable]) {
-            [HWYNetworking getOneCardBalanceData:^(NSError *error) {
-                NSLog(@"一卡通-正常模式");
-                [HWYNetworking getOneCardRecordData:^(NSError *error) {
-                    [self refreshOneCard];
-                }];
-            }];
-        } else {
-            [self refreshToFail];
-        }
-    }
-}
-
-- (void)endRefreshing {
-    [_refreshControl endRefreshing];
-    [self performSelector:@selector(resetRefreshControl) withObject:nil afterDelay:0.3];
-}
-
-- (void)resetRefreshControl {
-    _refreshControl.attributedTitle = [[NSAttributedString alloc] initWithString:@"下拉刷新"];
 }
 
 /*

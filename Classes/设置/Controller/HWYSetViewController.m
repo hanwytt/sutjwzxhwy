@@ -9,10 +9,10 @@
 #import "HWYSetViewController.h"
 #import "HWYVersionViewController.h"
 #import <MessageUI/MFMailComposeViewController.h>
+#import "MBProgressHUD+MJ.h"
+#import "HWYJwzxNetworking.h"
+#import "HWYSzgdNetworking.h"
 #import "HWYAppDefine.h"
-#import "MBProgressHUD.h"
-#import "HWYNetworking.h"
-#import "HWYAppDelegate.h"
 
 @interface HWYSetViewController () <UITableViewDataSource,UITableViewDelegate,MFMailComposeViewControllerDelegate,UIActionSheetDelegate> {
     NSString *_identifySwitch;
@@ -181,32 +181,13 @@
 
 - (void)sendMail
 {
-    MBProgressHUD *hud = [[MBProgressHUD alloc] initWithView:self.view];
-    hud.labelFont = [UIFont systemFontOfSize:15.0];
-    hud.customView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_error_black"]];
-    hud.mode = MBProgressHUDModeCustomView;
-    hud.removeFromSuperViewOnHide = YES;
-    [self.view addSubview:hud];
-    if ([HWYAppDelegate isReachable]) {
-        Class mailClass = (NSClassFromString(@"MFMailComposeViewController"));
-        if (!mailClass) {
-            hud.labelText = @"当前系统版本不支持应用内发送邮件功能";
-            [hud show:YES];
-            [hud hide:YES afterDelay:0.5];
-            return;
-        }
-        if (![mailClass canSendMail]) {
-            hud.labelText = @"用户没有设置邮件账户";
-            [hud show:YES];
-            [hud hide:YES afterDelay:0.5];
-            return;
-        }
-        [hud removeFromSuperview];
-        [self displayMailPicker];
+    Class mailClass = (NSClassFromString(@"MFMailComposeViewController"));
+    if (!mailClass) {
+        [MBProgressHUD showError:@"当前系统版本不支持应用内发送邮件功能" toView:self.view];
+    } else if (![mailClass canSendMail]) {
+        [MBProgressHUD showError:@"用户没有设置邮件账户" toView:self.view];
     } else {
-        hud.labelText = @"当前网络不可用";
-        [hud show:YES];
-        [hud hide:YES afterDelay:0.5];
+        [self displayMailPicker];
     }
 }
 
@@ -218,7 +199,7 @@
     //设置主题
     [mailPicker setSubject: @"意见反馈"];
     //添加收件人
-    NSArray *toRecipients = [NSArray arrayWithObject: @"yyydyhanwy@163.com"];
+    NSArray *toRecipients = [NSArray arrayWithObject: @"hanwytt@163.com"];
     [mailPicker setToRecipients: toRecipients];
     //添加抄送
     //    NSArray *ccRecipients = [NSArray arrayWithObjects:@"yyydyhanwy@163.com", nil];
@@ -237,35 +218,24 @@
 #pragma mark - 实现 MFMailComposeViewControllerDelegate
 - (void)mailComposeController:(MFMailComposeViewController *)controller didFinishWithResult:(MFMailComposeResult)result error:(NSError *)error
 {
-    MBProgressHUD *hud = [[MBProgressHUD alloc] initWithView:self.view];
-    hud.labelFont = [UIFont systemFontOfSize:15.0];
-    hud.customView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_success_black"]];
-    hud.mode = MBProgressHUDModeCustomView;
-    hud.removeFromSuperViewOnHide = YES;
-    [self.view addSubview:hud];
     //关闭邮件发送窗口
     [self dismissViewControllerAnimated:YES completion:^{
         switch (result) {
             case MFMailComposeResultCancelled:
-                hud.labelText = @"已取消";
+                [MBProgressHUD showSuccess:@"已取消" toView:self.view];
                 break;
             case MFMailComposeResultSaved:
-                hud.labelText = @"已保存";
+                [MBProgressHUD showSuccess:@"已保存" toView:self.view];
                 break;
             case MFMailComposeResultSent:
-                hud.labelText = @"已发送";
+                [MBProgressHUD showSuccess:@"已发送" toView:self.view];
                 break;
             case MFMailComposeResultFailed:
-                hud.customView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_error_black"]];
-                hud.labelText = @"保存或发送失败";
+                [MBProgressHUD showError:@"保存或发送失败" toView:self.view];
                 break;
             default:
-                [hud removeFromSuperview];
-                return;
                 break;
         }
-        [hud show:YES];
-        [hud hide:YES afterDelay:0.5];
     }];
 }
 
@@ -282,93 +252,52 @@
 }
 
 - (void)logout {
-    MBProgressHUD *hud = [[MBProgressHUD alloc] initWithView:self.view];
-    hud.labelFont = [UIFont systemFontOfSize:15.0];
-    hud.mode = MBProgressHUDModeIndeterminate;
-    hud.labelText = @"注销中";
-    hud.removeFromSuperViewOnHide = YES;
-    [self.view addSubview:hud];
-    [hud show:YES];
-    if (_jwzx | _szgd) {
-        if ([HWYAppDelegate isReachable]) {
-            if (_jwzx && _szgd) {
-                [HWYNetworking getLogoutJwzx:^(BOOL jwzx, NSError *error) {
-                    [HWYNetworking getLogoutSzgd:^(BOOL szgd, NSError *error) {
-                        hud.mode = MBProgressHUDModeCustomView;
-                        if (jwzx && szgd) {
-                            hud.customView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_success_black"]];
-                            hud.labelText = @"注销成功";
-                            [hud hide:YES afterDelay:0.5];
-                            
-                            _tableView.tableFooterView = nil;
-                            if ([self.delegateLogout respondsToSelector:@selector(logoutState)]) {
-                                [self.delegateLogout logoutState];
-                            }
-                            [_tableView reloadData];
-                        } else {
-                            hud.customView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_error_black"]];
-                            hud.labelText = @"注销失败";
-                            [hud hide:YES afterDelay:0.5];
-                        }
-                    }];
-                }];
-            } else if (_jwzx) {
-                [HWYNetworking getLogoutJwzx:^(BOOL jwzx, NSError *error) {
-                    hud.mode = MBProgressHUDModeCustomView;
-                    if (jwzx) {
-                        hud.customView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_success_black"]];
-                        hud.labelText = @"注销成功";
-                        [hud hide:YES afterDelay:0.5];
-                        
-                        _tableView.tableFooterView = nil;
-                        if ([self.delegateLogout respondsToSelector:@selector(logoutState)]) {
-                            [self.delegateLogout logoutState];
-                        }
-                        [_tableView reloadData];
-                    } else {
-                        hud.customView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_error_black"]];
-                        hud.labelText = @"注销失败";
-                        [hud hide:YES afterDelay:0.5];
-                    }
-                }];
-            }  else if (_szgd)  {
-                [HWYNetworking getLogoutSzgd:^(BOOL szgd, NSError *error) {
-                    hud.mode = MBProgressHUDModeCustomView;
-                    if (szgd) {
-                        hud.customView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_success_black"]];
-                        hud.labelText = @"注销成功";
-                        [hud hide:YES afterDelay:0.5];
-                        
-                        _tableView.tableFooterView = nil;
-                        if ([self.delegateLogout respondsToSelector:@selector(logoutState)]) {
-                            [self.delegateLogout logoutState];
-                        }
-                        [_tableView reloadData];
-                    } else {
-                        hud.customView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_error_black"]];
-                        hud.labelText = @"注销失败";
-                        [hud hide:YES afterDelay:0.5];
-                    }
-                }];
-            }
-        } else {
-            hud.customView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_error_black"]];
-            hud.mode = MBProgressHUDModeCustomView;
-            hud.labelText = @"当前网络不可用";
-            [hud hide:YES afterDelay:0.5];
-        }
+    MBProgressHUD *hud = [MBProgressHUD showMessage:@"注销中..." toView:self.view];
+    if (_jwzx && _szgd) {
+        [HWYJwzxNetworking logoutJwzxSuccess:^{
+            [HWYSzgdNetworking logoutSzgdSuccess:^{
+                [hud hide:YES];
+                [MBProgressHUD showSuccess:@"注销成功" toView:self.view];
+                [self logoutSuccess];
+            } failure:^{
+                [hud hide:YES];
+                [MBProgressHUD showSuccess:@"注销失败" toView:self.view];
+            }];
+        } failure:^{
+            [hud hide:YES];
+            [MBProgressHUD showSuccess:@"注销失败" toView:self.view];
+        }];
+    } else if (_jwzx) {
+        [HWYJwzxNetworking logoutJwzxSuccess:^{
+            [hud hide:YES];
+            [MBProgressHUD showSuccess:@"注销成功" toView:self.view];
+            [self logoutSuccess];
+        } failure:^{
+            [hud hide:YES];
+            [MBProgressHUD showSuccess:@"注销失败" toView:self.view];
+        }];
+    }  else if (_szgd)  {
+        [HWYSzgdNetworking logoutSzgdSuccess:^{
+            [hud hide:YES];
+            [MBProgressHUD showSuccess:@"注销成功" toView:self.view];
+            [self logoutSuccess];
+        } failure:^{
+            [hud hide:YES];
+            [MBProgressHUD showSuccess:@"注销失败" toView:self.view];
+        }];
     } else {
-        hud.customView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_success_black"]];
-        hud.mode = MBProgressHUDModeCustomView;
-        hud.labelText = @"注销成功";
-        [hud hide:YES afterDelay:0.5];
-        
-        _tableView.tableFooterView = nil;
-        if ([self.delegateLogout respondsToSelector:@selector(logoutState)]) {
-            [self.delegateLogout logoutState];
-        }
-        [_tableView reloadData];
+        [hud hide:YES];
+        [MBProgressHUD showSuccess:@"注销成功" toView:self.view];
+        [self logoutSuccess];
     }
+}
+
+- (void)logoutSuccess {
+    _tableView.tableFooterView = nil;
+    if ([self.delegateLogout respondsToSelector:@selector(logoutState)]) {
+        [self.delegateLogout logoutState];
+    }
+    [_tableView reloadData];
 }
 
 /*

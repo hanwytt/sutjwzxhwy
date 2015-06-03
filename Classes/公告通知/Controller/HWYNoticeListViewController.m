@@ -9,10 +9,10 @@
 #import "HWYNoticeListViewController.h"
 #import "HWYNoticeInfoViewController.h"
 #import "HWYNoticeListData.h"
+#import "HWYNewsNetworking.h"
+#import "MBProgressHUD+MJ.h"
+#import "MJRefresh.h"
 #import "HWYAppDefine.h"
-#import "HWYNetworking.h"
-#import "MBProgressHUD.h"
-#import "HWYAppDelegate.h"
 
 @interface HWYNoticeListViewController () <UITableViewDataSource,UITableViewDelegate> {
     NSString *_identify;
@@ -20,7 +20,6 @@
 }
 
 @property (strong, nonatomic) UITableView *tableView;
-@property (strong, nonatomic) UIRefreshControl *refreshControl;
 
 @end
 
@@ -53,46 +52,50 @@
     _identify = @"noticeListCell";
     [_tableView registerClass:[UITableViewCell class] forCellReuseIdentifier:_identify];
     [self.view addSubview:_tableView];
-    [self addRefreshControl];
-}
 
-- (void)addRefreshControl {
-    _refreshControl = [[UIRefreshControl alloc] init];
-    _refreshControl.attributedTitle = [[NSAttributedString alloc] initWithString:@"下拉刷新"];
-    [_refreshControl addTarget:self action:@selector(refreshView:) forControlEvents:UIControlEventValueChanged];
-    [_tableView addSubview:_refreshControl];
+    __weak typeof(self) weakSelf = self;
+    [self.tableView addLegendHeaderWithRefreshingBlock:^{
+        [weakSelf refreshTableView];
+    }];
+    
 }
 
 - (void)initNoticeList {
     _noticeListArr = [HWYNoticeListData getNoticeListData];
     [_tableView reloadData];
+    if ([_tableView.header isRefreshing]) {
+        [_tableView.header endRefreshing];
+    }
 }
 
 - (void)requestNetworking {
-    MBProgressHUD *hud = [[MBProgressHUD alloc] initWithView:self.view];
-    hud.labelFont = [UIFont systemFontOfSize:15.0];
-    hud.mode = MBProgressHUDModeIndeterminate;
-    hud.labelText = @"加载中";
-    hud.removeFromSuperViewOnHide = YES;
-    [self.view addSubview:hud];
-    [hud show:YES];
+    MBProgressHUD *hud = [MBProgressHUD showMessage:@"加载中..." toView:self.view];
     if ([KUserDefaults boolForKey:KModeOffline]) {
         NSLog(@"通知列表-离线模式");
-        [self performSelector:@selector(initNoticeList) withObject:nil afterDelay:0.5];
-        [hud hide:YES afterDelay:0.5];
+        [self didAfterDelay:^{
+            [self initNoticeList];
+            [hud hide:YES];
+        }];
     } else {
-        if ([HWYAppDelegate isReachable]) {
-            [HWYNetworking getNoticeListData:^(NSError *error) {
-                NSLog(@"通知列表-正常模式");
-                [self initNoticeList];
-                [hud hide:YES];
-            }];
-        } else {
-            hud.customView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_error_black"]];
-            hud.mode = MBProgressHUDModeCustomView;
-            hud.labelText = @"当前网络不可用";
-            [hud hide:YES afterDelay:0.5];
-        }
+        NSLog(@"通知列表-正常模式");
+        [HWYNewsNetworking getNoticeListData:^(NSError *error) {
+            [self initNoticeList];
+            [hud hide:YES];
+        }];
+    }
+}
+
+- (void)refreshTableView {
+    if ([KUserDefaults boolForKey:KModeOffline]) {
+        NSLog(@"通知列表-离线模式");
+        [self didAfterDelay:^{
+            [self initNoticeList];
+        }];
+    } else {
+        NSLog(@"通知列表-正常模式");
+        [HWYNewsNetworking getNoticeListData:^(NSError *error) {
+            [self initNoticeList];
+        }];
     }
 }
 
@@ -143,53 +146,6 @@
         [noticeInfo initTitleWith:noticeList.NAME plateid:noticeList.PLATE_ID];
     }
     [self.navigationController pushViewController:noticeInfo animated:YES];
-}
-
-- (void)refreshNoticeList {
-    [self initNoticeList];
-    _refreshControl.attributedTitle = [[NSAttributedString alloc] initWithString:@"刷新成功"];
-    [self performSelector:@selector(endRefreshing) withObject:nil afterDelay:0.3];
-}
-
-- (void)refreshToFail {
-    _refreshControl.attributedTitle = [[NSAttributedString alloc] initWithString:@"刷新失败"];
-    [self performSelector:@selector(endRefreshing) withObject:nil afterDelay:0.3];
-    MBProgressHUD *hud = [[MBProgressHUD alloc] initWithView:self.view];
-    hud.labelFont = [UIFont systemFontOfSize:15.0];
-    hud.customView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_error_black"]];
-    hud.mode = MBProgressHUDModeCustomView;
-    hud.labelText = @"当前网络不可用";
-    hud.removeFromSuperViewOnHide = YES;
-    [self.view addSubview:hud];
-    [hud show:YES];
-    [hud hide:YES afterDelay:0.5];
-}
-
-- (void)refreshView:(UIRefreshControl *)sender {
-    sender.attributedTitle = [[NSAttributedString alloc] initWithString:@"刷新中..."];
-    if ([KUserDefaults boolForKey:KModeOffline]) {
-        NSLog(@"通知列表-离线模式");
-        [self refreshNoticeList];
-        
-    } else {
-        if ([HWYAppDelegate isReachable]) {
-            [HWYNetworking getNoticeListData:^(NSError *error) {
-                NSLog(@"通知列表-正常模式");
-                [self refreshNoticeList];
-            }];
-        } else {
-            [self refreshToFail];
-        }
-    }
-}
-
-- (void)endRefreshing {
-    [_refreshControl endRefreshing];
-    [self performSelector:@selector(resetRefreshControl) withObject:nil afterDelay:0.3];
-}
-
-- (void)resetRefreshControl {
-    _refreshControl.attributedTitle = [[NSAttributedString alloc] initWithString:@"下拉刷新"];
 }
 
 /*

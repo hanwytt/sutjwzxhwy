@@ -9,10 +9,10 @@
 #import "HWYNewsInfoViewController.h"
 #import "HWYNewsInfoTableViewCell.h"
 #import "HWYNewsInfoDetailViewController.h"
+#import "HWYNewsNetworking.h"
+#import "MBProgressHUD+MJ.h"
+#import "MJRefresh.h"
 #import "HWYAppDefine.h"
-#import "HWYNetworking.h"
-#import "HWYAppDelegate.h"
-#import "MBProgressHUD.h"
 
 @interface HWYNewsInfoViewController () <UITableViewDataSource,UITableViewDelegate> {
     NSString *_identify;
@@ -24,7 +24,6 @@
 @property (strong,nonatomic) UINavigationBar *navBar;
 @property (strong,nonatomic) UINavigationItem *navItem;
 @property (strong, nonatomic) UITableView *tableView;
-@property (strong, nonatomic) UIRefreshControl *refreshControl;
 
 @end
 
@@ -63,46 +62,49 @@
     _identify = @"newsInfoCell";
     [_tableView registerClass:[HWYNewsInfoTableViewCell class] forCellReuseIdentifier:_identify];
     [self.view addSubview:_tableView];
-    [self addRefreshControl];
-}
 
-- (void)addRefreshControl {
-    _refreshControl = [[UIRefreshControl alloc] init];
-    _refreshControl.attributedTitle = [[NSAttributedString alloc] initWithString:@"下拉刷新"];
-    [_refreshControl addTarget:self action:@selector(refreshView:) forControlEvents:UIControlEventValueChanged];
-    [_tableView addSubview:_refreshControl];
+    __weak typeof(self) weakSelf = self;
+    [self.tableView addLegendHeaderWithRefreshingBlock:^{
+        [weakSelf refreshTableView];
+    }];
 }
 
 - (void)initNewsInfo {
     _newsInfoArr = [HWYNewsInfoData getNewsInfoData:_plateid type:_type];
     [_tableView reloadData];
+    if ([_tableView.header isRefreshing]) {
+        [_tableView.header endRefreshing];
+    }
 }
 
 - (void)requestNetworking {
-    MBProgressHUD *hud = [[MBProgressHUD alloc] initWithView:self.view];
-    hud.labelFont = [UIFont systemFontOfSize:15.0];
-    hud.mode = MBProgressHUDModeIndeterminate;
-    hud.labelText = @"加载中";
-    hud.removeFromSuperViewOnHide = YES;
-    [self.view addSubview:hud];
-    [hud show:YES];
+    MBProgressHUD *hud = [MBProgressHUD showMessage:@"加载中..." toView:self.view];
     if ([KUserDefaults boolForKey:KModeOffline]) {
         NSLog(@"新闻信息-离线模式");
-        [self performSelector:@selector(initNewsInfo) withObject:nil afterDelay:0.5];
-        [hud hide:YES afterDelay:0.5];
+        [self didAfterDelay:^{
+            [self initNewsInfo];
+            [hud hide:YES];
+        }];
     } else {
-        if ([HWYAppDelegate isReachable]) {
-            [HWYNetworking getNewsInfoData:_plateid type:_type compelet:^(NSError *error) {
-                NSLog(@"新闻信息-正常模式");
-                [self initNewsInfo];
-                [hud hide:YES];
-            }];
-        } else {
-            hud.customView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_error_black"]];
-            hud.mode = MBProgressHUDModeCustomView;
-            hud.labelText = @"当前网络不可用";
-            [hud hide:YES afterDelay:0.5];
-        }
+        NSLog(@"新闻信息-正常模式");
+        [HWYNewsNetworking getNewsInfoData:_plateid type:_type compelet:^(NSError *error) {
+            [self initNewsInfo];
+            [hud hide:YES];
+        }];
+    }
+}
+
+- (void)refreshTableView {
+    if ([KUserDefaults boolForKey:KModeOffline]) {
+        NSLog(@"新闻信息-离线模式");
+        [self didAfterDelay:^{
+            [self initNewsInfo];
+        }];
+    } else {
+        NSLog(@"新闻信息-正常模式");
+        [HWYNewsNetworking getNewsInfoData:_plateid type:_type compelet:^(NSError *error) {
+            [self initNewsInfo];
+        }];
     }
 }
 
@@ -140,52 +142,6 @@
     HWYNewsInfoData *newsInfo = _newsInfoArr[indexPath.row];
     newsInfoDetail.resourceid = newsInfo.RESOURCE_ID;
     [self.navigationController pushViewController:newsInfoDetail animated:YES];
-}
-
-- (void)refreshNewsInfo {
-    [self initNewsInfo];
-    _refreshControl.attributedTitle = [[NSAttributedString alloc] initWithString:@"刷新成功"];
-    [self performSelector:@selector(endRefreshing) withObject:nil afterDelay:0.3];
-}
-
-- (void)refreshToFail {
-    _refreshControl.attributedTitle = [[NSAttributedString alloc] initWithString:@"刷新失败"];
-    [self performSelector:@selector(endRefreshing) withObject:nil afterDelay:0.3];
-    MBProgressHUD *hud = [[MBProgressHUD alloc] initWithView:self.view];
-    hud.labelFont = [UIFont systemFontOfSize:15.0];
-    hud.customView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_error_black"]];
-    hud.mode = MBProgressHUDModeCustomView;
-    hud.labelText = @"当前网络不可用";
-    hud.removeFromSuperViewOnHide = YES;
-    [self.view addSubview:hud];
-    [hud show:YES];
-    [hud hide:YES afterDelay:0.5];
-}
-
-- (void)refreshView:(UIRefreshControl *)sender {
-    sender.attributedTitle = [[NSAttributedString alloc] initWithString:@"刷新中..."];
-    if ([KUserDefaults boolForKey:KModeOffline]) {
-        NSLog(@"新闻信息-离线模式");
-        [self refreshNewsInfo];
-    } else {
-        if ([HWYAppDelegate isReachable]) {
-            [HWYNetworking getNewsInfoData:_plateid type:_type compelet:^(NSError *error) {
-                NSLog(@"新闻信息-正常模式");
-                [self refreshNewsInfo];
-            }];
-        } else {
-            [self refreshToFail];
-        }
-    }
-}
-
-- (void)endRefreshing {
-    [_refreshControl endRefreshing];
-    [self performSelector:@selector(resetRefreshControl) withObject:nil afterDelay:0.3];
-}
-
-- (void)resetRefreshControl {
-    _refreshControl.attributedTitle = [[NSAttributedString alloc] initWithString:@"下拉刷新"];
 }
 
 /*

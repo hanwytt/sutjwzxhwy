@@ -89,12 +89,12 @@
 }
 
 + (void)hideHUDForView:(UIView *)view :(void (^)())completion {
-    [self hideHUDAfterDelay:0.5 forView:view completion:completion];
+    [self hideHUDAfterDelay:0.7 forView:view completion:completion];
 }
 
 + (void)hideHUD:(void (^)())completion {
-    // 默认0.5秒后消失
-    [self hideHUDAfterDelay:0.5 forView:nil completion:completion];
+    // 默认0.7秒后消失
+    [self hideHUDAfterDelay:0.7 forView:nil completion:completion];
 }
 
 + (void)hideHUDForView:(UIView *)view
@@ -118,7 +118,7 @@
 
 - (void)hideHUDDefaultDelay:(void(^)())completion
 {
-    // 默认0.5秒后消失
-    [self hideHUDAfterDelay:0.5 completion:completion];
+    // 默认0.7秒后消失
+    [self hideHUDAfterDelay:0.7 completion:completion];
 }
 @end

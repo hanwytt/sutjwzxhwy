@@ -13,4 +13,5 @@
 //初始化导航栏的同时，添加返回按钮、设置title
 -(void)configTitle:(NSString *)title;
 
+- (void)didAfterDelay:(void (^)())block;
 @end

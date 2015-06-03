@@ -9,7 +9,7 @@
 #import "HWYInformationViewController.h"
 #import "HWYInformationWebViewController.h"
 #import "HWYInformationData.h"
-#import "HWYNetworking.h"
+#import "HWYJwzxNetworking.h"
 #import "HWYAppDelegate.h"
 #import "MBProgressHUD.h"
 #import "UIImage+Extension.h"
@@ -190,30 +190,20 @@
 }
 
 - (void)requestNetworking {
-    MBProgressHUD *hud = [[MBProgressHUD alloc] initWithView:self.view];
-    hud.labelFont = [UIFont systemFontOfSize:15.0];
-    hud.mode = MBProgressHUDModeIndeterminate;
-    hud.labelText = @"加载中";
-    hud.removeFromSuperViewOnHide = YES;
-    [self.view addSubview:hud];
-    [hud show:YES];
+    MBProgressHUD *hud = [MBProgressHUD showMessage:@"加载中..." toView:self.view];
+    
     if ([KUserDefaults boolForKey:KModeOffline]) {
         NSLog(@"学生信息-离线模式");
-        [self performSelector:@selector(initInfo) withObject:nil afterDelay:0.5];
-        [hud hide:YES afterDelay:0.5];
+        [self didAfterDelay:^{
+            [self initInfo];
+            [hud hide:YES];
+        }];
     } else {
-        if ([HWYAppDelegate isReachable]) {
-            [HWYNetworking getInformationData:^(NSError *error) {
-                NSLog(@"学生信息-正常模式");
-                [self initInfo];
-                [hud hide:YES];
-            }];
-        } else {
-            hud.customView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_error_black"]];
-            hud.mode = MBProgressHUDModeCustomView;
-            hud.labelText = @"当前网络不可用";
-            [hud hide:YES afterDelay:0.5];
-        }
+        NSLog(@"学生信息-正常模式");
+        [HWYJwzxNetworking getInformationData:^{
+            [self initInfo];
+            [hud hide:YES];
+        }];
     }
 }
 
@@ -222,8 +212,9 @@
     hud.margin = 3.0;
     if ([KUserDefaults boolForKey:KModeOffline]) {
         NSLog(@"学生头像-离线模式");
-        [hud hideHUDDefaultDelay:^{
+        [self didAfterDelay:^{
             [self initInfoImage];
+            [hud hide:YES];
         }];
     } else {
         NSLog(@"学生头像-正常模式");

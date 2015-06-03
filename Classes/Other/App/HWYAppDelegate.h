@@ -7,11 +7,13 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "Reachability.h"
 
 @interface HWYAppDelegate : UIResponder <UIApplicationDelegate>
 
 @property (strong, nonatomic) UIWindow *window;
 @property (nonatomic) BOOL menuVisible;
+@property (nonatomic) Reachability *reachable;
 
 + (HWYAppDelegate *)shareDelegate;
 + (BOOL)isReachable;

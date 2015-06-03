@@ -8,8 +8,8 @@
 
 #import "HWYLoginOffLineViewController.h"
 #import "HWYLoginOffLineData.h"
+#import "MBProgressHUD+MJ.h"
 #import "HWYAppDefine.h"
-#import "MBProgressHUD.h"
 
 @interface HWYLoginOffLineViewController () <UITextFieldDelegate>
 
@@ -126,29 +126,34 @@
 
 - (void)loginBtnClick:(UIButton *)sender {
     [self doneItemClick:nil];
-    MBProgressHUD *hud = [[MBProgressHUD alloc] initWithView:self.view];
-    hud.labelFont = [UIFont systemFontOfSize:15.0];
-    hud.labelText = @"登录中";
-    hud.removeFromSuperViewOnHide = YES;
-    [self.view addSubview:hud];
-    [hud show:YES];
-    BOOL success = [HWYLoginOffLineData getLoginOffLineData:_nameField.text password:_passwordField.text];
+    
+    NSString *number = _nameField.text;
+    NSString *password = _passwordField.text;
+    
+    if (!KStringExist(number)) {
+        UIAlertView *alter = [[UIAlertView alloc] initWithTitle:@"温馨提示" message:@"请输入账号" delegate:self cancelButtonTitle:@"确定" otherButtonTitles:nil];
+        [alter show];
+        return;
+    } else if (!KStringExist(password)) {
+        UIAlertView *alter = [[UIAlertView alloc] initWithTitle:@"温馨提示" message:@"请输入密码" delegate:self cancelButtonTitle:@"确定" otherButtonTitles:nil];
+        [alter show];
+        return;
+    }
+    
+    MBProgressHUD *hud = [MBProgressHUD showMessage:@"登录中..." toView:self.view];
+    BOOL success = [HWYLoginOffLineData getLoginOffLineData:number password:password];
+    [hud hide:YES];
     if (success) {
-        hud.customView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_success_black"]];
-        hud.mode = MBProgressHUDModeCustomView;
-        hud.labelText = @"登录成功";
-        [self performSelector:@selector(dismiss) withObject:nil afterDelay:0.5];
-        [hud hide:YES afterDelay:0.5];
+        [MBProgressHUD showSuccess:@"登录成功" toView:self.view];
         if (![_nameField.text isEqualToString:[KUserDefaults valueForKey:KDefaultNumber]]) {
-            [KUserDefaults setObject:_nameField.text forKey:KDefaultNumber];
+            [KUserDefaults setObject:number forKey:KDefaultNumber];
             [KUserDefaults synchronize];
         }
+        [self didAfterDelay:^{
+            [self dismiss];
+        }];
     } else {
-        hud.customView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_error_black"]];
-        hud.mode = MBProgressHUDModeCustomView;
-        hud.labelText = @"错误的用户名或密码";
-        [hud hide:YES afterDelay:0.5];
-        NSLog(@"错误的用户名或密码");
+        [MBProgressHUD showError:@"用户名或密码错误" toView:self.view];
     }
 }
 

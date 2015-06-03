@@ -9,11 +9,10 @@
 #import "HWYNewsListViewController.h"
 #import "HWYNewsInfoViewController.h"
 #import "HWYNewsListData.h"
-#import "HWYAppDefine.h"
-#import "HWYNetworking.h"
+#import "HWYNewsNetworking.h"
 #import "MBProgressHUD+MJ.h"
-#import "HWYAppDelegate.h"
 #import "MJRefresh.h"
+#import "HWYAppDefine.h"
 
 @interface HWYNewsListViewController () <UITableViewDataSource,UITableViewDelegate> {
     NSString *_identify;
@@ -23,7 +22,6 @@
 }
 
 @property (strong, nonatomic) UITableView *tableView;
-@property (strong, nonatomic) UIRefreshControl *refreshControl;
 
 @end
 
@@ -56,18 +54,11 @@
     _identify = @"newsListCell";
     [_tableView registerClass:[UITableViewCell class] forCellReuseIdentifier:_identify];
     [self.view addSubview:_tableView];
-//    [self addRefreshControl];
+    
     __weak typeof(self) weakSelf = self;
     [self.tableView addLegendHeaderWithRefreshingBlock:^{
-        [weakSelf requestNetworking];
+        [weakSelf refreshTableView];
     }];
-}
-
-- (void)addRefreshControl {
-    _refreshControl = [[UIRefreshControl alloc] init];
-    _refreshControl.attributedTitle = [[NSAttributedString alloc] initWithString:@"下拉刷新"];
-    [_refreshControl addTarget:self action:@selector(refreshView:) forControlEvents:UIControlEventValueChanged];
-    [_tableView addSubview:_refreshControl];
 }
 
 - (void)initNewsList {
@@ -75,21 +66,38 @@
     _newsTypeArr = @[@"工大要闻", @"头版头条"];
     _newsListArr = [HWYNewsListData getNewsListData];
     [_tableView reloadData];
-    [self.tableView.header endRefreshing];
+    if ([_tableView.header isRefreshing]) {
+        [_tableView.header endRefreshing];
+    }
 }
 
 - (void)requestNetworking {
-    MBProgressHUD *hud = [MBProgressHUD showMessage:@"加载中" toView:self.view];
+    MBProgressHUD *hud = [MBProgressHUD showMessage:@"加载中..." toView:self.view];
     if ([KUserDefaults boolForKey:KModeOffline]) {
         NSLog(@"新闻列表-离线模式");
-        [hud hideHUDDefaultDelay:^{
+        [self didAfterDelay:^{
+            [self initNewsList];
+            [hud hide:YES];
+        }];
+    } else {
+        NSLog(@"新闻列表-正常模式");
+        [HWYNewsNetworking getNewsListData:^() {
+            [self initNewsList];
+            [hud hide:YES];
+        }];
+    }
+}
+
+- (void)refreshTableView {
+    if ([KUserDefaults boolForKey:KModeOffline]) {
+        NSLog(@"新闻列表-离线模式");
+        [self didAfterDelay:^{
             [self initNewsList];
         }];
     } else {
         NSLog(@"新闻列表-正常模式");
-        [HWYNetworking getNewsListData:^() {
+        [HWYNewsNetworking getNewsListData:^() {
             [self initNewsList];
-            [hud hide:YES];
         }];
     }
 }
@@ -173,52 +181,6 @@
             break;
     }
     [self.navigationController pushViewController:newsInfo animated:YES];
-}
-
-- (void)refreshNewsList {
-    [self initNewsList];
-    _refreshControl.attributedTitle = [[NSAttributedString alloc] initWithString:@"刷新成功"];
-    [self performSelector:@selector(endRefreshing) withObject:nil afterDelay:0.3];
-}
-
-- (void)refreshToFail {
-    _refreshControl.attributedTitle = [[NSAttributedString alloc] initWithString:@"刷新失败"];
-    [self performSelector:@selector(endRefreshing) withObject:nil afterDelay:0.3];
-    MBProgressHUD *hud = [[MBProgressHUD alloc] initWithView:self.view];
-    hud.labelFont = [UIFont systemFontOfSize:15.0];
-    hud.customView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_error_black"]];
-    hud.mode = MBProgressHUDModeCustomView;
-    hud.labelText = @"当前网络不可用";
-    hud.removeFromSuperViewOnHide = YES;
-    [self.view addSubview:hud];
-    [hud show:YES];
-    [hud hide:YES afterDelay:0.5];
-}
-
-- (void)refreshView:(UIRefreshControl *)sender {
-    sender.attributedTitle = [[NSAttributedString alloc] initWithString:@"刷新中..."];
-    if ([KUserDefaults boolForKey:KModeOffline]) {
-        NSLog(@"新闻列表-离线模式");
-        [self refreshNewsList];
-    } else {
-        if ([HWYAppDelegate isReachable]) {
-            [HWYNetworking getNewsListData:^() {
-                NSLog(@"新闻列表-正常模式");
-                [self refreshNewsList];
-            }];
-        } else {
-            [self refreshToFail];
-        }
-    }
-}
-
-- (void)endRefreshing {
-    [_refreshControl endRefreshing];
-    [self performSelector:@selector(resetRefreshControl) withObject:nil afterDelay:0.3];
-}
-
-- (void)resetRefreshControl {
-    _refreshControl.attributedTitle = [[NSAttributedString alloc] initWithString:@"下拉刷新"];
 }
 
 /*

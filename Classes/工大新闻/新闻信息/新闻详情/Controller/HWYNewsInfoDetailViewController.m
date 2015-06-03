@@ -7,10 +7,10 @@
 //
 
 #import "HWYNewsInfoDetailViewController.h"
-#import "HWYNetworking.h"
+#import "HWYNewsInfoDetailData.h"
+#import "HWYNewsNetworking.h"
+#import "MBProgressHUD+MJ.h"
 #import "HWYAppDefine.h"
-#import "MBProgressHUD.h"
-#import "HWYAppDelegate.h"
 
 @interface HWYNewsInfoDetailViewController () {
     HWYNewsInfoDetailData *_newsInfoDetail;
@@ -51,43 +51,24 @@
         htmlString = [self getHtmlString];
         [_webView loadHTMLString:htmlString baseURL:nil];
     } else {
-        MBProgressHUD *hud = [[MBProgressHUD alloc] initWithView:self.view];
-        hud.labelFont = [UIFont systemFontOfSize:15.0];
-        hud.removeFromSuperViewOnHide = YES;
-        [self.view addSubview:hud];
-        hud.customView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_error_black"]];
-        hud.mode = MBProgressHUDModeCustomView;
-        hud.labelText = @"加载数据失败";
-        [hud show:YES];
-        [hud hide:YES afterDelay:0.5];
+        [MBProgressHUD showError:@"加载数据失败" toView:self.view];
     }
 }
 
 - (void)requestNetworking {
-    MBProgressHUD *hud = [[MBProgressHUD alloc] initWithView:self.view];
-    hud.labelFont = [UIFont systemFontOfSize:15.0];
-    hud.mode = MBProgressHUDModeIndeterminate;
-    hud.labelText = @"加载中";
-    hud.removeFromSuperViewOnHide = YES;
-    [self.view addSubview:hud];
-    [hud show:YES];
+    MBProgressHUD *hud = [MBProgressHUD showMessage:@"加载中..." toView:self.view];
     if ([KUserDefaults boolForKey:KModeOffline]) {
         NSLog(@"新闻详情-离线模式");
-        [self performSelector:@selector(initNewsInfoDetail) withObject:nil afterDelay:0.5];
-        [hud hide:YES afterDelay:0.5];
+        [self didAfterDelay:^{
+            [self initNewsInfoDetail];
+            [hud hide:YES];
+        }];
     } else {
-        if ([HWYAppDelegate isReachable]) {
-            [HWYNetworking getNewsInfoDetailData:_resourceid compelet:^(NSError *error) {
-                NSLog(@"新闻详情-正常模式");
-                [self initNewsInfoDetail];
-                [hud hide:YES];
-            }];
-        } else {
-            hud.customView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_error_black"]];
-            hud.mode = MBProgressHUDModeCustomView;
-            hud.labelText = @"当前网络不可用";
-            [hud hide:YES afterDelay:0.5];
-        }
+        NSLog(@"新闻详情-正常模式");
+        [HWYNewsNetworking getNewsInfoDetailData:_resourceid compelet:^(NSError *error) {
+            [self initNewsInfoDetail];
+            [hud hide:YES];
+        }];
     }
 }
 

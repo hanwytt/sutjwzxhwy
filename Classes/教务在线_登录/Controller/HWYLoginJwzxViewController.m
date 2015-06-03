@@ -9,11 +9,10 @@
 #import "HWYLoginJwzxViewController.h"
 #import "HWYMainViewController.h"
 #import "HWYLoginJwzxData.h"
-#import "MBProgressHUD+MJ.h"
 #import "HWYJwzxNetworking.h"
+#import "MBProgressHUD+MJ.h"
 #import "UIImage+Extension.h"
 #import <TesseractOCR/TesseractOCR.h>
-#import "HWYAppDelegate.h"
 #import "HWYAppDefine.h"
 #import "HWYURLConfig.h"
 
@@ -203,7 +202,9 @@
         [hud hide:YES];
         if (_jwzx.success) {
             [MBProgressHUD showSuccess:@"登录成功" toView:self.view];
-            [self performSelector:@selector(dismiss) withObject:nil afterDelay:0.7];
+            [self didAfterDelay:^{
+                [self dismiss];
+            }];
             if (![number isEqualToString:[KUserDefaults valueForKey:KDefaultNumber]]) {
                 [KUserDefaults setObject:number forKey:KDefaultNumber];
                 [KUserDefaults synchronize];

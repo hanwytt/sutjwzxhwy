@@ -23,4 +23,6 @@
 
 -(void)leftItemClick:(UIButton *)sender;
 
+- (void)didAfterDelay:(void(^)())block;
+
 @end

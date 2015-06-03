@@ -11,18 +11,18 @@
 
 @interface HWYSzgdNetworking : NSObject
 
-//+ (void)getLoginSzgdLt:(void(^)(BOOL success, NSString *lt, NSError *error)) block;
-//
-//+ (void)getLoginSzgdData:(NSString *)username password:(NSString *)password lt:(NSString *)lt compelet:(void(^)(BOOL success, HWYLoginSzgdData *szgd, NSError *error)) block;
-//
-//+ (void)getLoginSzgdJump:(NSString *)href compelet:(void(^)(BOOL success,NSError *error)) block;
-//
-//+ (void)getBookBorrowData:(void(^)(NSError *error)) block;
-//
-//+ (void)getOneCardBalanceData:(void(^)(NSError *error)) block;
-//
-//+ (void)getOneCardRecordData:(void(^)(NSError *error)) block;
-//
-//+ (void)getLogoutSzgd:(void(^)(BOOL szgd, NSError *error)) block;
++ (void)getLoginSzgdLt:(void(^)(NSString *lt)) block;
+
++ (void)getLoginSzgdData:(NSString *)username password:(NSString *)password lt:(NSString *)lt compelet:(void(^)(HWYLoginSzgdData *szgd)) block;
+
++ (void)getLoginSzgdJump:(NSString *)href success:(void(^)())success failure:(void(^)())failure;
+
++ (void)getBookBorrowData:(void(^)()) block;
+
++ (void)getOneCardBalanceData:(void(^)()) block;
+
++ (void)getOneCardRecordData:(void(^)()) block;
+
++ (void)logoutSzgdSuccess:(void(^)())success failure:(void(^)())failure;
 
 @end

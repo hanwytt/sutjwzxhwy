@@ -82,19 +82,6 @@ static CGFloat range = P_WIDTH/2 - 70 + P_WIDTH * 0.8 * 0.5;    //218
         {
             CGFloat x = view.center.x + translation.x - P_WIDTH/2;
             if (x >= 0 && x <= range) {
-//                [UIView animateWithDuration:0.001 animations:^{
-//                    CGFloat oldScale = 1.0 - (view.center.x - P_WIDTH/2)/(range/0.2);
-//                    CGFloat newScale = 1.0 - x/(range/0.2);
-//                    // 缩放
-//                    view.transform = CGAffineTransformScale(view.transform, newScale/oldScale, newScale/oldScale);
-//                    // 平移
-//                    view.center = CGPointMake(view.center.x + translation.x*newScale/oldScale*range/(P_WIDTH-70), view.center.y);
-//                    if ([self.delegate respondsToSelector:@selector(moveTransformView:)]) {
-//                        [self.delegate moveTransformView:(view.center.x - P_WIDTH/2)];
-//                    }
-//                } completion:^(BOOL finished) {
-//                    [sender setTranslation:CGPointZero inView:view];
-//                }];
                 CGFloat oldScale = 1.0 - (view.center.x - P_WIDTH/2)/(range/0.2);
                 CGFloat newScale = 1.0 - x/(range/0.2);
                 // 缩放
@@ -201,6 +188,12 @@ static CGFloat range = P_WIDTH/2 - 70 + P_WIDTH * 0.8 * 0.5;    //218
             _control.hidden = YES;
         }];
     }
+}
+
+- (void)didAfterDelay:(void (^)())block {
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.7 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        block();
+    });
 }
 
 //- (void)pan:(UIPanGestureRecognizer *)sender {

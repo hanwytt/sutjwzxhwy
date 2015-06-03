@@ -11,13 +11,13 @@
 #import "HWYScheduleWebViewController.h"
 #import "HWYScheduleData.h"
 #import "HWYAppDefine.h"
-#import "HWYNetworking.h"
+#import "HWYJwzxNetworking.h"
 #import "MBProgressHUD.h"
+#import "MJRefresh.h"
 #import "HWYAppDelegate.h"
 
 @interface HWYScheduleViewController () <UITableViewDataSource,UITableViewDelegate, UIGestureRecognizerDelegate,UIPickerViewDataSource,UIPickerViewDelegate> {
     NSString *_identify;
-    NSArray *_semesterArr;
     NSArray *_scheduleArr;
     NSArray *_currentArr;
 }
@@ -26,11 +26,10 @@
 @property (strong, nonatomic) UIButton *currentBtn;
 @property (strong, nonatomic) UIView *selectView;
 @property (strong, nonatomic) UIView *headerView;
-@property (strong, nonatomic) UIRefreshControl *refreshControl;
 @property (strong, nonatomic) UITextField *semesterText;
 @property (strong, nonatomic) UIToolbar *toolBar;
 @property (strong, nonatomic) UIPickerView *pickerView;
-
+@property (strong, nonatomic) NSArray *semesterArr;
 @end
 
 @implementation HWYScheduleViewController
@@ -57,6 +56,16 @@
     }
 }
 
+- (NSArray *)semesterArr {
+    if (_semesterArr == nil) {
+        //plist文件的路径
+        NSString *path = [[NSBundle mainBundle] pathForResource:@"semester.plist" ofType:nil];
+        _semesterArr = [NSArray arrayWithContentsOfFile:path];
+    }
+    return _semesterArr;
+}
+
+
 - (void)initView {
     _pickerView = [[UIPickerView alloc] initWithFrame:CGRectMake(0, 0, P_WIDTH, 216)];
     _pickerView.backgroundColor = KColor(200, 203, 211);
@@ -68,7 +77,6 @@
     UIBarButtonItem *rightItem=[[UIBarButtonItem alloc] initWithTitle:@"确定" style:UIBarButtonItemStylePlain target:self action:@selector(rightBtnClick:)];
     _toolBar.items = @[leftItem, spaceItem, rightItem];
     
-    _semesterArr = @[@"2008-2009学年第一学期", @"2008-2009学年第二学期", @"2009-2010学年第一学期", @"2009-2010学年第二学期", @"2010-2011学年第一学期", @"2010-2011学年第二学期", @"2011-2012学年第一学期", @"2011-2012学年第二学期", @"2012-2013学年第一学期", @"2012-2013学年第二学期", @"2013-2014学年第一学期", @"2013-2014学年第二学期", @"2014-2015学年第一学期", @"2014-2015学年第二学期", @"2015-2016学年第一学期", @"2015-2016学年第二学期"];
     NSDate *nowDate = [NSDate date];
     NSCalendar *calendar = [NSCalendar currentCalendar];
     NSDateComponents *comps;
@@ -87,7 +95,7 @@
     _semesterText.background = [UIImage imageNamed:@"bg_input_one"];
     _semesterText.inputView = _pickerView;
     _semesterText.inputAccessoryView = _toolBar;
-    _semesterText.text = _semesterArr[row];
+    _semesterText.text = self.semesterArr[row];
     [self.view addSubview:_semesterText];
     
     //定义tableView的headview
@@ -172,12 +180,16 @@
     _tableView.rowHeight = 69;
     _tableView.separatorInset = UIEdgeInsetsZero;
     _tableView.layoutMargins = UIEdgeInsetsZero;
+    _tableView.tableHeaderView = _headerView;
     _tableView.tableFooterView = [[UIView alloc] initWithFrame:CGRectZero];
     _identify = @"scheduleCell";
     [_tableView registerClass:[HWYScheduleTableViewCell class] forCellReuseIdentifier:_identify];
     [self.view addSubview:_tableView];
     
-    [self addRefreshControl];
+    __weak typeof(self) weakSelf = self;
+    [self.tableView addLegendHeaderWithRefreshingBlock:^{
+        [weakSelf refreshTableView];
+    }];
     
     UISwipeGestureRecognizer *swipeLeft = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipe:)];
     swipeLeft.direction = UISwipeGestureRecognizerDirectionLeft;
@@ -196,49 +208,43 @@
     [self.view addGestureRecognizer:tap];
 }
 
-- (void)addRefreshControl {
-    _refreshControl = [[UIRefreshControl alloc] init];
-    _refreshControl.attributedTitle = [[NSAttributedString alloc] initWithString:@"下拉刷新"];
-    [_refreshControl addTarget:self action:@selector(refreshView:) forControlEvents:UIControlEventValueChanged];
-    [_tableView addSubview:_refreshControl];
-}
-
 - (void)initSchedule {
     _scheduleArr = [HWYScheduleData getScheduleData:_semesterText.text];
     _currentArr = _scheduleArr[_currentBtn.tag - 1000];
-    if (!KArrayEmpty(_scheduleArr)) {
-        _tableView.tableHeaderView = _headerView;
-    } else {
-        _tableView.tableHeaderView = nil;
-    }
     [_tableView reloadData];
+    if ([_tableView.header isRefreshing]) {
+        [_tableView.header endRefreshing];
+    }
 }
 
 - (void)requestNetworking {
-    MBProgressHUD *hud = [[MBProgressHUD alloc] initWithView:self.view];
-    hud.labelFont = [UIFont systemFontOfSize:15.0];
-    hud.mode = MBProgressHUDModeIndeterminate;
-    hud.labelText = @"加载中";
-    hud.removeFromSuperViewOnHide = YES;
-    [self.view addSubview:hud];
-    [hud show:YES];
+    MBProgressHUD *hud = [MBProgressHUD showMessage:@"加载中..." toView:self.view];
     if ([KUserDefaults boolForKey:KModeOffline]) {
         NSLog(@"课程表-离线模式");
-        [self performSelector:@selector(initSchedule) withObject:nil afterDelay:0.5];
-        [hud hide:YES afterDelay:0.5];
+        [self didAfterDelay:^{
+            [self initSchedule];
+            [hud hide:YES];
+        }];
     } else {
-        if ([HWYAppDelegate isReachable]) {
-            [HWYNetworking getScheduleData:_semesterText.text compelet:^(NSError *error) {
-                NSLog(@"课程表-正常模式");
-                [self initSchedule];
-                [hud hide:YES];
-            }];
-        } else {
-            hud.customView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_error_black"]];
-            hud.mode = MBProgressHUDModeCustomView;
-            hud.labelText = @"当前网络不可用";
-            [hud hide:YES afterDelay:0.5];
-        }
+        NSLog(@"课程表-正常模式");
+        [HWYJwzxNetworking getScheduleData:_semesterText.text compelet:^{
+            [self initSchedule];
+            [hud hide:YES];
+        }];
+    }
+}
+
+- (void)refreshTableView {
+    if ([KUserDefaults boolForKey:KModeOffline]) {
+        NSLog(@"课程表-离线模式");
+        [self didAfterDelay:^{
+            [self initSchedule];
+        }];
+    } else {
+        NSLog(@"课程表-正常模式");
+        [HWYJwzxNetworking getScheduleData:_semesterText.text compelet:^{
+            [self initSchedule];
+        }];
     }
 }
 
@@ -264,52 +270,6 @@
         cell.backgroundColor = KColor(251, 251, 251);
     }
     return cell;
-}
-
-- (void)refreshSchedule {
-    [self initSchedule];
-    _refreshControl.attributedTitle = [[NSAttributedString alloc] initWithString:@"刷新成功"];
-    [self performSelector:@selector(endRefreshing) withObject:nil afterDelay:0.3];
-}
-
-- (void)refreshToFail {
-    _refreshControl.attributedTitle = [[NSAttributedString alloc] initWithString:@"刷新失败"];
-    [self performSelector:@selector(endRefreshing) withObject:nil afterDelay:0.3];
-    MBProgressHUD *hud = [[MBProgressHUD alloc] initWithView:self.view];
-    hud.labelFont = [UIFont systemFontOfSize:15.0];
-    hud.customView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_error_black"]];
-    hud.mode = MBProgressHUDModeCustomView;
-    hud.labelText = @"当前网络不可用";
-    hud.removeFromSuperViewOnHide = YES;
-    [self.view addSubview:hud];
-    [hud show:YES];
-    [hud hide:YES afterDelay:0.5];
-}
-
-- (void)refreshView:(UIRefreshControl *)sender {
-    sender.attributedTitle = [[NSAttributedString alloc] initWithString:@"刷新中..."];
-    if ([KUserDefaults boolForKey:KModeOffline]) {
-        NSLog(@"课程表-离线模式");
-        [self refreshSchedule];
-    } else {
-        if ([HWYAppDelegate isReachable]) {
-            [HWYNetworking getScheduleData:_semesterText.text compelet:^(NSError *error) {
-                NSLog(@"课程表-正常模式");
-                [self refreshSchedule];
-            }];
-        } else {
-            [self refreshToFail];
-        }
-    }
-}
-
-- (void)endRefreshing {
-    [_refreshControl endRefreshing];
-    [self performSelector:@selector(resetRefreshControl) withObject:nil afterDelay:0.3];
-}
-
-- (void)resetRefreshControl {
-    _refreshControl.attributedTitle = [[NSAttributedString alloc] initWithString:@"下拉刷新"];
 }
 
 - (void)selectBtnClick:(UIButton *)sender {
@@ -367,7 +327,7 @@
 
 //设置当前pickerview里当前传入的列里有几行
 -(NSInteger)pickerView:(UIPickerView *)pickerView numberOfRowsInComponent:(NSInteger)component{
-    return _semesterArr.count;
+    return self.semesterArr.count;
 }
 
 //设置当前pickerview里每列的宽度
@@ -382,7 +342,7 @@
 
 //设置当前pickerview里每行显示的内容
 -(NSString *)pickerView:(UIPickerView *)pickerView titleForRow:(NSInteger)row forComponent:(NSInteger)component{
-    return _semesterArr[row];
+    return self.semesterArr[row];
 }
 
 - (void)leftBtnClick:(UIButton *)sender {
@@ -391,7 +351,7 @@
 
 - (void)rightBtnClick:(UIButton *)sender {
     NSInteger row = [_pickerView selectedRowInComponent:0];
-    _semesterText.text = _semesterArr[row];
+    _semesterText.text = self.semesterArr[row];
     [self requestNetworking];
     [_semesterText resignFirstResponder];
 }

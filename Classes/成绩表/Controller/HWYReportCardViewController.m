@@ -10,7 +10,7 @@
 #import "HWYReportCardTableViewCell.h"
 #import "HWYReportCardWebViewController.h"
 #import "HWYReportCardData.h"
-#import "HWYNetworking.h"
+#import "HWYJwzxNetworking.h"
 #import "HWYAppDefine.h"
 #import "HWYAppDelegate.h"
 #import "MBProgressHUD+MJ.h"
@@ -24,7 +24,6 @@
 }
 
 @property (strong, nonatomic) UITableView *tableView;
-@property (strong, nonatomic) UIRefreshControl *refreshControl;
 @property (strong, nonatomic) UISearchBar *searchBar;
 @property (strong, nonatomic) UISearchDisplayController *searchDisplay;
 
@@ -70,12 +69,9 @@
     [self.view addSubview:_tableView];
     
     __weak typeof(self) weakSelf = self;
-    // 设置回调（一旦进入刷新状态就会调用这个refreshingBlock）
-    [self.tableView addLegendHeaderWithRefreshingBlock:^{
+    [_tableView addLegendHeaderWithRefreshingBlock:^{
         [weakSelf refreshTableView];
     }];
-    // 马上进入刷新状态
-//    [self.tableView.legendHeader beginRefreshing];
 
     _searchBar = [[UISearchBar alloc] init];
     _searchBar.placeholder = @"搜索";
@@ -96,7 +92,9 @@
     _reportCount = [HWYReportCountData getReportCountData];
     _reportCardArr = [HWYReportCardData getReportCardData];
     [_tableView reloadData];
-    [self.tableView.header endRefreshing];
+    if ([_tableView.header isRefreshing]) {
+        [_tableView.header endRefreshing];
+    }
 }
 
 #pragma mark - 获取数据
@@ -104,12 +102,13 @@
     MBProgressHUD *hud = [MBProgressHUD showMessage:@"加载中..." toView:self.view];
     if ([KUserDefaults boolForKey:KModeOffline]) {
         NSLog(@"成绩表-离线模式");
-        [hud hideHUDDefaultDelay:^{
+        [self didAfterDelay:^{
             [self initReportCard];
+            [hud hide:YES];
         }];
     } else {
         NSLog(@"成绩表-正常模式");
-        [HWYNetworking getReportCardData:^(NSError *error) {
+        [HWYJwzxNetworking getReportCardData:^{
             [self initReportCard];
             [hud hide:YES];
         }];
@@ -119,12 +118,12 @@
 - (void)refreshTableView {
     if ([KUserDefaults boolForKey:KModeOffline]) {
         NSLog(@"成绩表-离线模式");
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.7 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [self didAfterDelay:^{
             [self initReportCard];
-        });
+        }];
     } else {
         NSLog(@"成绩表-正常模式");
-        [HWYNetworking getReportCardData:^(NSError *error) {
+        [HWYJwzxNetworking getReportCardData:^{
             [self initReportCard];
         }];
     }

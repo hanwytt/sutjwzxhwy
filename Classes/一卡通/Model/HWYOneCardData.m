@@ -126,13 +126,13 @@
         return;
     }
     
+    NSString *number = [KUserDefaults valueForKey:KDefaultNumber];
+    FMResultSet *rs = [db executeQuery:@"SELECT * FROM szgd_onecard_record where XH = ?", number];
+    if ([rs next]) {
+        [db executeUpdate:@"delete from szgd_onecard_record where XH = ?", number];
+    }
     for (HWYOneCardRecordData *oneCardRecord in arr) {
-        FMResultSet *rs = [db executeQuery:@"SELECT * FROM szgd_onecard_record where XH = ? and CARD_ID = ?", oneCardRecord.XH, oneCardRecord.CARD_ID];
-        if ([rs next]) {
-            [db executeUpdate:@"update szgd_onecard_record set YKT = ?, JE = ?, ZDMC = ?, time = ? where XH = ? and CARD_ID = ?", oneCardRecord.YKT, oneCardRecord.JE, oneCardRecord.ZDMC, oneCardRecord.time, oneCardRecord.XH, oneCardRecord.CARD_ID];
-        } else {
-            [db executeUpdate:@"insert into szgd_onecard_record (XH, YKT, JE, ZDMC, time, CARD_ID) values (?, ?, ?, ?, ?, ?)", oneCardRecord.XH, oneCardRecord.YKT, oneCardRecord.JE, oneCardRecord.ZDMC, oneCardRecord.time, oneCardRecord.CARD_ID];
-        }
+        [db executeUpdate:@"insert into szgd_onecard_record (XH, YKT, JE, ZDMC, time, CARD_ID) values (?, ?, ?, ?, ?, ?)", oneCardRecord.XH, oneCardRecord.YKT, oneCardRecord.JE, oneCardRecord.ZDMC, oneCardRecord.time, oneCardRecord.CARD_ID];
     }
     [db close];
 }

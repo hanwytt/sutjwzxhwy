@@ -9,10 +9,10 @@
 #import "HWYBookBorrowViewController.h"
 #import "HWYBookBorrowTableViewCell.h"
 #import "HWYBookBorrowData.h"
-#import "MBProgressHUD.h"
+#import "HWYSzgdNetworking.h"
+#import "MBProgressHUD+MJ.h"
 #import "HWYAppDefine.h"
-#import "HWYNetworking.h"
-#import "HWYAppDelegate.h"
+#import "MJRefresh.h"
 
 @interface HWYBookBorrowViewController () <UITableViewDataSource,UITableViewDelegate> {
     NSString *_identify;
@@ -20,7 +20,7 @@
 }
 
 @property (strong, nonatomic) UITableView *tableView;
-@property (strong, nonatomic) UIRefreshControl *refreshControl;
+
 @end
 
 @implementation HWYBookBorrowViewController
@@ -52,57 +52,52 @@
     _identify = @"bookBorrowCell";
     [_tableView registerClass:[HWYBookBorrowTableViewCell class] forCellReuseIdentifier:_identify];
     [self.view addSubview:_tableView];
-    [self addRefreshControl];
-}
-
-- (void)addRefreshControl {
-    _refreshControl = [[UIRefreshControl alloc] init];
-    _refreshControl.attributedTitle = [[NSAttributedString alloc] initWithString:@"下拉刷新"];
-    [_refreshControl addTarget:self action:@selector(refreshView:) forControlEvents:UIControlEventValueChanged];
-    [_tableView addSubview:_refreshControl];
+    
+    __weak typeof(self) weakSelf = self;
+    [_tableView addLegendHeaderWithRefreshingBlock:^{
+        [weakSelf refreshTableView];
+    }];
 }
 
 - (void)initBookBorrow {
     _bookBorrowArr = [HWYBookBorrowData getBookBorrowData];
     if (KArrayEmpty(_bookBorrowArr)) {
-        MBProgressHUD *hud = [[MBProgressHUD alloc] initWithView:self.view];
-        hud.labelFont = [UIFont systemFontOfSize:15.0];
-        hud.mode = MBProgressHUDModeText;
-        hud.labelText = @"无图书借阅信息";
-        hud.removeFromSuperViewOnHide = YES;
-        [self.view addSubview:hud];
-        [hud show:YES];
-        [hud hide:YES afterDelay:0.5];
-    } else {
-        [_tableView reloadData];
+        [MBProgressHUD showInfo:@"无图书借阅信息" toView:self.view];
+    }
+    [_tableView reloadData];
+    if ([_tableView.header isRefreshing]) {
+        [_tableView.header endRefreshing];
     }
 }
 
 - (void)requestNetworking {
-    MBProgressHUD *hud = [[MBProgressHUD alloc] initWithView:self.view];
-    hud.labelFont = [UIFont systemFontOfSize:15.0];
-    hud.mode = MBProgressHUDModeIndeterminate;
-    hud.labelText = @"加载中";
-    hud.removeFromSuperViewOnHide = YES;
-    [self.view addSubview:hud];
-    [hud show:YES];
+    MBProgressHUD *hud = [MBProgressHUD showMessage:@"加载中..." toView:self.view];
     if ([KUserDefaults boolForKey:KModeOffline]) {
         NSLog(@"图书借阅-离线模式");
-        [self performSelector:@selector(initBookBorrow) withObject:nil afterDelay:0.5];
-        [hud hide:YES afterDelay:0.5];
+        [self didAfterDelay:^{
+            [self initBookBorrow];
+            [hud hide:YES];
+        }];
     } else {
-        if ([HWYAppDelegate isReachable]) {
-            [HWYNetworking getBookBorrowData:^(NSError *error) {
-                NSLog(@"图书借阅-正常模式");
-                [self initBookBorrow];
-                [hud hide:YES];
-            }];
-        } else {
-            hud.customView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_error_black"]];
-            hud.mode = MBProgressHUDModeCustomView;
-            hud.labelText = @"当前网络不可用";
-            [hud hide:YES afterDelay:0.5];
-        }
+        NSLog(@"图书借阅-正常模式");
+        [HWYSzgdNetworking getBookBorrowData:^{
+            [self initBookBorrow];
+            [hud hide:YES];
+        }];
+    }
+}
+
+- (void)refreshTableView {
+    if ([KUserDefaults boolForKey:KModeOffline]) {
+        NSLog(@"图书借阅-离线模式");
+        [self didAfterDelay:^{
+            [self initBookBorrow];
+        }];
+    } else {
+        NSLog(@"图书借阅-正常模式");
+        [HWYSzgdNetworking getBookBorrowData:^{
+            [self initBookBorrow];
+        }];
     }
 }
 
@@ -135,10 +130,7 @@
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
-    if (!KArrayEmpty(_bookBorrowArr)) {
-        return 27;
-    }
-    return 0;
+    return 27;
 }
 
 - (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section {
@@ -162,52 +154,6 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     [tableView deselectRowAtIndexPath:[tableView indexPathForSelectedRow] animated:YES];
-}
-
-- (void)refreshBookBorrow {
-    [self initBookBorrow];
-    _refreshControl.attributedTitle = [[NSAttributedString alloc] initWithString:@"刷新成功"];
-    [self performSelector:@selector(endRefreshing) withObject:nil afterDelay:0.3];
-}
-
-- (void)refreshToFail {
-    _refreshControl.attributedTitle = [[NSAttributedString alloc] initWithString:@"刷新失败"];
-    [self performSelector:@selector(endRefreshing) withObject:nil afterDelay:0.3];
-    MBProgressHUD *hud = [[MBProgressHUD alloc] initWithView:self.view];
-    hud.labelFont = [UIFont systemFontOfSize:15.0];
-    hud.customView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"icon_error_black"]];
-    hud.mode = MBProgressHUDModeCustomView;
-    hud.labelText = @"当前网络不可用";
-    hud.removeFromSuperViewOnHide = YES;
-    [self.view addSubview:hud];
-    [hud show:YES];
-    [hud hide:YES afterDelay:0.5];
-}
-
-- (void)refreshView:(UIRefreshControl *)sender {
-    sender.attributedTitle = [[NSAttributedString alloc] initWithString:@"刷新中..."];
-    if ([KUserDefaults boolForKey:KModeOffline]) {
-        NSLog(@"图书借阅-离线模式");
-        [self refreshBookBorrow];
-    } else {
-        if ([HWYAppDelegate isReachable]) {
-            [HWYNetworking getBookBorrowData:^(NSError *error) {
-                NSLog(@"图书借阅-正常模式");
-                [self refreshBookBorrow];
-            }];
-        } else {
-            [self refreshToFail];
-        } 
-    }
-}
-
-- (void)endRefreshing {
-    [_refreshControl endRefreshing];
-    [self performSelector:@selector(resetRefreshControl) withObject:nil afterDelay:0.3];
-}
-
-- (void)resetRefreshControl {
-    _refreshControl.attributedTitle = [[NSAttributedString alloc] initWithString:@"下拉刷新"];
 }
 
 /*

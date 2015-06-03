@@ -48,12 +48,7 @@
         [db executeUpdate:@"delete from szgd_bookborrow where number = ?", number];
     }
     for (HWYBookBorrowData *bookBorrow in arr) {
-        rs = [db executeQuery:@"SELECT * FROM szgd_bookborrow where number = ? and propNo = ?", number, bookBorrow.propNo];
-        if ([rs next]) {
-            [db executeUpdate:@"update szgd_bookborrow set mTitle = ?, mAuthor = ?, lendDate = ?, normRetDate = ? where number = ? and propNo = ?", bookBorrow.mTitle, bookBorrow.mAuthor, bookBorrow.lendDate, bookBorrow.normRetDate, number, bookBorrow.propNo];
-        } else {
-            [db executeUpdate:@"insert into szgd_bookborrow (number, propNo, mTitle, mAuthor, lendDate, normRetDate) values (?, ?, ?, ?, ?, ?)", number, bookBorrow.propNo, bookBorrow.mTitle, bookBorrow.mAuthor, bookBorrow.lendDate, bookBorrow.normRetDate];
-        }
+         [db executeUpdate:@"insert into szgd_bookborrow (number, propNo, mTitle, mAuthor, lendDate, normRetDate) values (?, ?, ?, ?, ?, ?)", number, bookBorrow.propNo, bookBorrow.mTitle, bookBorrow.mAuthor, bookBorrow.lendDate, bookBorrow.normRetDate];
     }
     [db close];
 }
