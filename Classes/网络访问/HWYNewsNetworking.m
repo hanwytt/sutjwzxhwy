@@ -34,7 +34,7 @@
 }
 
 
-+ (void)getNewsInfoData:(NSString *)plateid type:(NSInteger)type compelet:(void(^)())block {
++ (void)getNewsInfoData:(NSString *)plateid type:(NSInteger)type pageNo:(NSInteger)pageNo compelet:(void(^)())block {
     NSString *method = nil;
     NSArray *list = [NSArray array];
     if (type == 0) {
@@ -44,6 +44,7 @@
         method = @"getPimInfoByType";
         list =  @[plateid, @"1"];
     }
+    NSNumber *page = [NSNumber numberWithInteger:pageNo];
     NSDictionary *parameters = @{
                                  @"map": @{
                                          @"method": method,
@@ -53,8 +54,8 @@
                                                  },
                                          @"pm": @{
                                                  @"javaClass": @"com.neusoft.education.edp.client.PageManager",
-                                                 @"pageSize": @30,
-                                                 @"pageNo": @1,
+                                                 @"pageSize": @20,
+                                                 @"pageNo": page,
                                                  @"totalCount": @-1,
                                                  @"order": [NSNull null],
                                                  @"filters": @{
@@ -120,7 +121,8 @@
     }];
 }
 
-+ (void)getNoticeInfoData:(NSString *)plateid compelet:(void(^)())block {
++ (void)getNoticeInfoData:(NSString *)plateid pageNo:(NSInteger)pageNo compelet:(void(^)())block {
+    NSNumber *page = [NSNumber numberWithInteger:pageNo];
     NSDictionary *parameters = @{
                                  @"map": @{
                                          @"method": @"getPimInfo",
@@ -130,8 +132,8 @@
                                                  },
                                          @"pm": @{
                                                  @"javaClass": @"com.neusoft.education.edp.client.PageManager",
-                                                 @"pageSize": @30,
-                                                 @"pageNo": @1,
+                                                 @"pageSize": @20,
+                                                 @"pageNo": page,
                                                  @"totalCount": @-1,
                                                  @"order":  [NSNull null],
                                                  @"filters": @{

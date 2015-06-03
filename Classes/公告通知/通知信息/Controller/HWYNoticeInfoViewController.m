@@ -65,6 +65,9 @@
     [self.tableView addLegendHeaderWithRefreshingBlock:^{
         [weakSelf refreshTableView];
     }];
+    [self.tableView addLegendFooterWithRefreshingBlock:^{
+        [weakSelf refreshTableFooterView];
+    }];
 }
 
 
@@ -86,7 +89,7 @@
         }];
     } else {
         NSLog(@"通知信息-正常模式");
-        [HWYNewsNetworking getNoticeInfoData:_plateid compelet:^(NSError *error) {
+        [HWYNewsNetworking getNoticeInfoData:_plateid pageNo:1 compelet:^(NSError *error) {
             [self initNoticeInfo];
             [hud hide:YES];
         }];
@@ -101,8 +104,24 @@
         }];
     } else {
         NSLog(@"通知信息-正常模式");
-        [HWYNewsNetworking getNoticeInfoData:_plateid compelet:^(NSError *error) {
+        [HWYNewsNetworking getNoticeInfoData:_plateid pageNo:1 compelet:^(NSError *error) {
             [self initNoticeInfo];
+        }];
+    }
+}
+
+- (void)refreshTableFooterView {
+    if ([KUserDefaults boolForKey:KModeOffline]) {
+        NSLog(@"通知信息-离线模式");
+        [self didAfterDelay:^{
+            [self initNoticeInfo];
+        }];
+    } else {
+        NSLog(@"通知信息-正常模式");
+        NSInteger pageNo = _noticeInfoArr.count/20 + 1;
+        [HWYNewsNetworking getNoticeInfoData:_plateid pageNo:pageNo compelet:^(NSError *error) {
+            [self initNoticeInfo];
+            [_tableView.footer endRefreshing];
         }];
     }
 }
@@ -112,6 +131,7 @@
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    _tableView.footer.hidden = !_noticeInfoArr.count;
     return _noticeInfoArr.count;
 }
 

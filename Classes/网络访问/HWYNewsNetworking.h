@@ -12,13 +12,13 @@
 
 + (void)getNewsListData:(void(^)())block;
 
-+ (void)getNewsInfoData:(NSString *)plateid type:(NSInteger)type compelet:(void(^)())block;
++ (void)getNewsInfoData:(NSString *)plateid type:(NSInteger)type pageNo:(NSInteger)pageNo compelet:(void(^)())block;
 
 + (void)getNewsInfoDetailData:(NSString *)resourceid compelet:(void(^)())block;
 
 + (void)getNoticeListData:(void(^)())block;
 
-+ (void)getNoticeInfoData:(NSString *)plateid compelet:(void(^)())block;
++ (void)getNoticeInfoData:(NSString *)plateid pageNo:(NSInteger)pageNo compelet:(void(^)())block;
 
 + (void)getNoticeInfoDetailData:(NSString *)resourceid compelet:(void(^)())block;
 
