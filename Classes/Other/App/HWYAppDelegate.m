@@ -9,6 +9,7 @@
 #import "HWYAppDelegate.h"
 #import "HWYMainViewController.h"
 #import "HWYAppDefine.h"
+#import "MBProgressHUD+MJ.h"
 
 @interface HWYAppDelegate ()
 
@@ -63,7 +64,7 @@
         case NotReachable:   // 没有网络连接
             return NO;
             break;
-        case ReachableViaWWAN:  // 使用3G网络
+        case ReachableViaWWAN:  // 使用蜂窝移动网络
             return YES;
             break;
         case ReachableViaWiFi:  // 使用WiFi网络
@@ -78,11 +79,13 @@
     NetworkStatus status = [curReach currentReachabilityStatus];
     switch (status) {
         case NotReachable:
-//            hud.labelText = @"当前网络不可用";
+            [MBProgressHUD showInfo:@"当前网络不可用"];
             break;
         case ReachableViaWWAN:
+            [MBProgressHUD showInfo:@"正在使用蜂窝移动网络"];
             break;
         case ReachableViaWiFi:
+            [MBProgressHUD showInfo:@"正在使用WiFi"];
             break;
         default:
             break;
