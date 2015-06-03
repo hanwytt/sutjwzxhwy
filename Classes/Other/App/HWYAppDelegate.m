@@ -82,10 +82,10 @@
             [MBProgressHUD showInfo:@"当前网络不可用"];
             break;
         case ReachableViaWWAN:
-            [MBProgressHUD showInfo:@"正在使用蜂窝移动网络"];
+//            [MBProgressHUD showInfo:@"正在使用蜂窝移动网络"];
             break;
         case ReachableViaWiFi:
-            [MBProgressHUD showInfo:@"正在使用WiFi"];
+//            [MBProgressHUD showInfo:@"正在使用WiFi"];
             break;
         default:
             break;
