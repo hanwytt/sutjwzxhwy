@@ -92,6 +92,14 @@
         NSLog(@"Could not open db.");
         return ;
     }
+    
+    NSString *jwzx_info = @"CREATE TABLE IF NOT EXISTS jwzx_info (number VARCHAR PRIMARY KEY NOT NULL REFERENCES jwzx_szgd_login (number), name VARCHAR, sex VARCHAR, nation VARCHAR, school VARCHAR, department VARCHAR, major VARCHAR, className VARCHAR, grade VARCHAR, education VARCHAR, idCardNo VARCHAR, interval VARCHAR, imageData BLOB)";
+    BOOL result = [db executeUpdate:jwzx_info];
+    if (!result) {
+        NSLog(@"Could create table.");
+        return;
+    }
+    
     FMResultSet *rs = [db executeQuery:@"SELECT * FROM jwzx_info where number = ?", number];
     if ([rs next]) {
         [db executeUpdate:@"update jwzx_info set imageData = ? where number = ?", data, number];
@@ -99,7 +107,6 @@
         [db executeUpdate:@"insert into jwzx_info (number, imageData) values (?, ?)", number, data];
     }
     [db close];
-
 }
 
 + (NSData *)getInfoImageData:(NSString *)number {

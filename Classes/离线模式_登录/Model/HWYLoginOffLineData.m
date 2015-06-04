@@ -19,6 +19,7 @@
         NSLog(@"Could not open db.");
         return NO;
     }
+    
     FMResultSet *rs = [db executeQuery:@"SELECT * FROM jwzx_szgd_login where number = ? and password_jwzx = ? or password_szgd = ?", name, password, password];
     if ([rs next]) {
         [db close];
@@ -39,9 +40,8 @@
     FMResultSet *rs = [db executeQuery:@"SELECT * FROM jwzx_szgd_login where number = ?", name];
     NSString *pwd = [NSString string];
     if ([rs next]) {
-        if (KStringExist([rs stringForColumnIndex:1])) {
-            pwd = [rs stringForColumnIndex:1];
-        } else {
+        pwd = [rs stringForColumnIndex:1];
+        if (!KStringExist(pwd)) {
             pwd = [rs stringForColumnIndex:2];
         }
     }

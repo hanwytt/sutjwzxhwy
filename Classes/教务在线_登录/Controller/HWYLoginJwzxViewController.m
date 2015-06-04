@@ -218,8 +218,8 @@
 
 - (void)dismiss {
     [self dismissViewControllerAnimated:YES completion:^{
-        if ([self.delegate respondsToSelector:@selector(loginJwzxState:number:)]) {
-            [self.delegate loginJwzxState:YES number:_nameField.text];
+        if ([self.delegate respondsToSelector:@selector(loginJwzxState:)]) {
+            [self.delegate loginJwzxState:YES];
         }
     }];
 }

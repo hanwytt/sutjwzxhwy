@@ -28,6 +28,14 @@
         NSLog(@"Could not open db.");
         return;
     }
+    
+    NSString *jwzx_szgd_login = @"CREATE TABLE IF NOT EXISTS jwzx_szgd_login (number VARCHAR PRIMARY KEY NOT NULL, password_jwzx VARCHAR, password_szgd VARCHAR)";
+    BOOL result = [db executeUpdate:jwzx_szgd_login];
+    if (!result) {
+        NSLog(@"Could create table.");
+        return;
+    }
+    
     FMResultSet *rs = [db executeQuery:@"SELECT * FROM jwzx_szgd_login where number = ?", name];
     if ([rs next]) {
         [db executeUpdate:@"update jwzx_szgd_login set password_szgd = ? where number = ?", password, name];

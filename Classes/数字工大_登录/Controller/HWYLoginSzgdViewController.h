@@ -11,7 +11,7 @@
 
 @protocol HWYLoginSzgdState <NSObject>
 
-- (void)loginSzgdState:(BOOL)success number:(NSString *)number;
+- (void)loginSzgdState:(BOOL)success;
 
 @end
 

@@ -159,8 +159,8 @@
 
 - (void)dismiss {
     [self dismissViewControllerAnimated:YES completion:^{
-        if ([self.delegate respondsToSelector:@selector(loginOffLineState:number:)]) {
-            [self.delegate loginOffLineState:YES number:_nameField.text];
+        if ([self.delegate respondsToSelector:@selector(loginOffLineState:)]) {
+            [self.delegate loginOffLineState:YES];
         }
     }];
 }

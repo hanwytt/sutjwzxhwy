@@ -19,8 +19,12 @@
 #import "HWYOneCardViewController.h"
 #import "HWYBookBorrowViewController.h"
 #import "HWYSetViewController.h"
+#import "HWYInformationData.h"
+#import "UIImage+Extension.h"
+#import "MBProgressHUD+MJ.h"
 #import "HWYAppDelegate.h"
 #import "HWYAppDefine.h"
+#import "HWYURLConfig.h"
 #import "HWYMenuData.h"
 
 static CGFloat range = P_WIDTH/2 - 70 + P_WIDTH * 0.8 * 0.5;
@@ -38,6 +42,7 @@ static CGFloat range = P_WIDTH/2 - 70 + P_WIDTH * 0.8 * 0.5;
 @property (strong, nonatomic) UIImageView *imageView;
 @property (strong, nonatomic) UITableView *tableView;
 @property (strong, nonatomic) UIButton *loginBtn;
+@property (strong, nonatomic) UIImageView *btnImage;
 @property (strong, nonatomic) UILabel *btnLable;
 @property (strong, nonatomic) UIView *headerView;
 @property (strong, nonatomic) NSArray *menuArr;
@@ -89,7 +94,7 @@ static CGFloat range = P_WIDTH/2 - 70 + P_WIDTH * 0.8 * 0.5;
     _forwardRow = -1;
     _currentRow = -1;
     _imageView = [[UIImageView alloc] initWithFrame:self.view.frame];
-    _imageView.image = [UIImage imageNamed:@"bg_home_default"];
+    [_imageView setImage:[UIImage imageNamed:@"bg_home_default"]];
     [self.view addSubview:_imageView];
     
     //设置tableview的headview
@@ -97,9 +102,9 @@ static CGFloat range = P_WIDTH/2 - 70 + P_WIDTH * 0.8 * 0.5;
     _headerView.backgroundColor = [UIColor clearColor];
     _loginBtn = [UIButton buttonWithType:UIButtonTypeCustom];
     _loginBtn.frame = CGRectMake(40, 0, 210, 50);
-    UIImageView *btnImage = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 50, 50)];
-    btnImage.image = [UIImage imageNamed:@"bg_default_login"];
-    [_loginBtn addSubview:btnImage];
+    _btnImage = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 50, 50)];
+    [_btnImage setImage:[UIImage imageNamed:@"bg_default_login"]];
+    [_loginBtn addSubview:_btnImage];
     _btnLable = [[UILabel alloc] initWithFrame:CGRectMake(60, 15, 150, 21)];
     _btnLable.font =[UIFont boldSystemFontOfSize:20.0];
     _btnLable.textColor = [UIColor whiteColor];
@@ -109,7 +114,7 @@ static CGFloat range = P_WIDTH/2 - 70 + P_WIDTH * 0.8 * 0.5;
     [_loginBtn addTarget:self action:@selector(loginBtnClick:) forControlEvents:UIControlEventTouchUpInside];
     [_headerView addSubview:_loginBtn];
     
-    _tableView = [[UITableView alloc] initWithFrame:CGRectMake(-100, 64, P_WIDTH, P_HEIGHT-64) style:UITableViewStylePlain];
+    _tableView = [[UITableView alloc] initWithFrame:CGRectMake(-100, 56, P_WIDTH, P_HEIGHT-56) style:UITableViewStylePlain];
     _tableView.transform = CGAffineTransformMakeScale(0.8, 0.8);
     _tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     _tableView.dataSource = self;
@@ -261,11 +266,10 @@ static CGFloat range = P_WIDTH/2 - 70 + P_WIDTH * 0.8 * 0.5;
     _tableView.alpha = 0.5 + x/(range/0.5);
 }
 
-- (void)loginOffLineState:(BOOL)success number:(NSString *)number {
+- (void)loginOffLineState:(BOOL)success {
     if (success) {
         _offLine = YES;
-        _btnLable.alpha = 1.0;
-        _btnLable.text = number;
+        [self loginState];
         if (_currentRow >= 2 && _currentRow <= 6) {
             [self initRightView];
         } else {
@@ -274,11 +278,10 @@ static CGFloat range = P_WIDTH/2 - 70 + P_WIDTH * 0.8 * 0.5;
     }
 }
 
-- (void)loginJwzxState:(BOOL)success number:(NSString *)number {
+- (void)loginJwzxState:(BOOL)success {
     if (success) {
         _jwzx = YES;
-        _btnLable.alpha = 1.0;
-        _btnLable.text = number;
+        [self loginState];
         if (_currentRow >= 2 && _currentRow <= 4) {
             [self initRightView];
         } else {
@@ -287,11 +290,10 @@ static CGFloat range = P_WIDTH/2 - 70 + P_WIDTH * 0.8 * 0.5;
     }
 }
 
-- (void)loginSzgdState:(BOOL)success number:(NSString *)number {
+- (void)loginSzgdState:(BOOL)success {
     if (success) {
         _szgd = YES;
-        _btnLable.alpha = 1.0;
-        _btnLable.text = number;
+        [self loginState];
         [self initRightView];
     }
 }
@@ -321,10 +323,32 @@ static CGFloat range = P_WIDTH/2 - 70 + P_WIDTH * 0.8 * 0.5;
     }
 }
 
+- (void)loginState {
+    NSString *number = [KUserDefaults valueForKey:KDefaultNumber];
+    NSData *imageData = [HWYInformationData getInfoImageData:number];
+    if (imageData) {
+        UIImage *newImage = [UIImage CircleImageWithName:nil andImageData:imageData borderWidth:0 borderColor:[UIColor whiteColor]];
+        [_btnImage setImage:newImage];
+    } else {
+        NSString *string = [NSString stringWithFormat:JWZX_INFO_IMAGE_URL, number];
+        NSURL *url = [NSURL URLWithString:string];
+        [UIImage imageWithUrl:url success:^(NSData *data, UIImage *image) {
+            [HWYInformationData saveInfoImageData:data number:number];
+            UIImage *newImage = [UIImage CircleImageWithOldImage:image borderWidth:0 borderColor:[UIColor whiteColor]];
+            [_btnImage setImage:newImage];
+        } failure:^{
+            [MBProgressHUD showError:@"获取头像失败" toView:self.view];
+        }];
+    }
+    _btnLable.alpha = 1.0;
+    _btnLable.text = number;
+}
+
 - (void)logoutState {
     _offLine = NO;
     _jwzx = NO;
     _szgd = NO;
+    [_btnImage setImage:[UIImage imageNamed:@"bg_default_login"]];
     _btnLable.alpha = 0.5;
     _btnLable.text = @"登录";
 }

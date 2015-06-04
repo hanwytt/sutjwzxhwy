@@ -11,7 +11,7 @@
 
 @protocol HWYLoginJwzxState <NSObject>
 
-- (void)loginJwzxState:(BOOL)success number:(NSString *)number;
+- (void)loginJwzxState:(BOOL)success;
 
 @end
 

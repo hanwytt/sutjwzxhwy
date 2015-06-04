@@ -185,8 +185,8 @@
 
 - (void)dismiss {
     [self dismissViewControllerAnimated:YES completion:^{
-        if ([self.delegate respondsToSelector:@selector(loginSzgdState:number:)]) {
-            [self.delegate loginSzgdState:YES number:_nameField.text];
+        if ([self.delegate respondsToSelector:@selector(loginSzgdState:)]) {
+            [self.delegate loginSzgdState:YES];
         }
     }];
 }

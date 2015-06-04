@@ -149,6 +149,10 @@
                     [self sendMail];
                     return;
                     break;
+                case 2:
+                    [MBProgressHUD showInfo:@"暂不可用" toView:self.view];
+                    return;
+                    break;
                 default:
                     return;
                     break;

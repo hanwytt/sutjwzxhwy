@@ -11,7 +11,7 @@
 
 @protocol HWYLoginOffLineState <NSObject>
 
-- (void)loginOffLineState:(BOOL)success number:(NSString *)number;
+- (void)loginOffLineState:(BOOL)success;
 
 @end
 
