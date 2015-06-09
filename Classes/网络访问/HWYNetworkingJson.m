@@ -50,7 +50,6 @@
             success(responseObject);
         }
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-        NSLog(@"responseObject = %@", operation.responseObject);
         NSLog(@"error = %@", error);
         if (failure) {
             [MBProgressHUD showError:@"网络连接错误"];
