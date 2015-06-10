@@ -49,12 +49,11 @@
 - (void)initNoticeInfoDetail {
     _noticeInfoDetail = [HWYNoticeInfoDetailData getNoticeInfoDetailData:_resourceid];
     NSString *htmlString = [NSString string];
-    if (KStringExist(_noticeInfoDetail.CONTENT)) {
-        htmlString = [self getHtmlString];
-        [_webView loadHTMLString:htmlString baseURL:nil];
-    } else {
-        [MBProgressHUD showError:@"加载数据失败" toView:self.view];
+    if (!KStringExist(_noticeInfoDetail.CONTENT)) {
+        [MBProgressHUD showError:@"通知内容为空" toView:self.view];
     }
+    htmlString = [self getHtmlString];
+    [_webView loadHTMLString:htmlString baseURL:nil];
 }
 
 - (void)requestNetworking {

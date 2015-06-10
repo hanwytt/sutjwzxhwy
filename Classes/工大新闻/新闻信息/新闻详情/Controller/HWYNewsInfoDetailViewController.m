@@ -47,12 +47,11 @@
 - (void)initNewsInfoDetail {
     _newsInfoDetail = [HWYNewsInfoDetailData getNewsInfoDetailData:_resourceid];
     NSString *htmlString = [NSString string];
-    if (KStringExist(_newsInfoDetail.CONTENT)) {
-        htmlString = [self getHtmlString];
-        [_webView loadHTMLString:htmlString baseURL:nil];
-    } else {
-        [MBProgressHUD showError:@"加载数据失败" toView:self.view];
+    if (!KStringExist(_newsInfoDetail.CONTENT)) {
+        [MBProgressHUD showError:@"新闻内容为空" toView:self.view];
     }
+    htmlString = [self getHtmlString];
+    [_webView loadHTMLString:htmlString baseURL:nil];
 }
 
 - (void)requestNetworking {
