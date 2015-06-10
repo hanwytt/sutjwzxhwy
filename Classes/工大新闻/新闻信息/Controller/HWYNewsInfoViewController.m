@@ -67,9 +67,11 @@
     [self.tableView addLegendHeaderWithRefreshingBlock:^{
         [weakSelf refreshTableView];
     }];
-    [self.tableView addLegendFooterWithRefreshingBlock:^{
-        [weakSelf refreshTableFooterView];
-    }];
+    if (![KUserDefaults boolForKey:KModeOffline]) {
+        [self.tableView addLegendFooterWithRefreshingBlock:^{
+            [weakSelf refreshTableFooterView];
+        }];
+    }
 }
 
 - (void)initNewsInfo {
