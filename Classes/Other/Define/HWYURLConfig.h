@@ -26,15 +26,16 @@
 //数字工大->登录界面(请求加密字符串和提交账号密码参数不同)
 #define SZGD_LOGIN_URL @"http://cas.sut.edu.cn/cas/login"
 //数字工大->图书借阅
-#define JWZX_BOOKBORROW_URL @"http://portal.sut.edu.cn/dcp/fresh/fresh.action?type=json&r=json&gp="
+#define JWZX_BOOKBORROW_URL @"http://portal.sut.edu.cn/dcp/fresh/fresh.action"
+//?type=json&r=json&gp=(修改请求头之前用的链接)
 //数字工大->一卡通(余额和消费记录参数不同)
-#define SZGD_ONECARD_URL @"http://portal.sut.edu.cn/dcp/card/card.action?type=json&r=json&gp="
+#define SZGD_ONECARD_URL @"http://portal.sut.edu.cn/dcp/card/card.action"
 //数字工大->注销
 #define SZGD_LOGOUT_URL @"http://cas.sut.edu.cn/cas/logout"
 
 //新闻
-#define SZGD_CMS_URL @"http://portal.sut.edu.cn/dcp/cms/cms.service?type=json&r=json&gp="
+#define SZGD_CMS_URL @"http://portal.sut.edu.cn/dcp/cms/cms.service"
 //通知
-#define SZGD_PIM_URL @"http://portal.sut.edu.cn/dcp/pim/pim.service?type=json&r=json&gp="
+#define SZGD_PIM_URL @"http://portal.sut.edu.cn/dcp/pim/pim.service"
 
 #endif

@@ -43,14 +43,20 @@
     [AFNetworkActivityIndicatorManager sharedManager].enabled = YES;
     AFHTTPRequestOperationManager *manager = [AFHTTPRequestOperationManager manager];
     manager.requestSerializer = [AFJSONRequestSerializer serializer];
+    [manager.requestSerializer setValue:@"json" forHTTPHeaderField:@"render"];
+    [manager.requestSerializer setValue:@"json" forHTTPHeaderField:@"clientType"];
     manager.responseSerializer = [AFJSONResponseSerializer serializer];
+//    manager.responseSerializer = [AFHTTPResponseSerializer serializer];
+//    manager.responseSerializer.acceptableContentTypes = [NSSet setWithObjects:@"text/html",@"application/json",@"text/plain", nil];
     [manager POST:url parameters:parameters success:^(AFHTTPRequestOperation *operation, id responseObject) {
         NSLog(@"responseObject = %@",responseObject);
+//        NSDictionary *dict = [NSJSONSerialization JSONObjectWithData:responseObject options:NSJSONReadingMutableContainers error:nil];
         if (success) {
             success(responseObject);
         }
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
         NSLog(@"error = %@", error);
+        NSLog(@"responseObject = %@",operation.responseString);
         if (failure) {
             [MBProgressHUD showError:@"网络连接错误"];
             failure(error);
