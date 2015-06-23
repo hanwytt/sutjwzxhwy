@@ -25,8 +25,8 @@ static CGFloat range = P_WIDTH/2 - 70 + P_WIDTH * 0.8 * 0.5;    //218
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         // Custom initialization
-        self.extendedLayoutIncludesOpaqueBars = YES;
-        self.automaticallyAdjustsScrollViewInsets = NO;
+        self.extendedLayoutIncludesOpaqueBars = YES;//操作栏透明
+        self.automaticallyAdjustsScrollViewInsets = NO;//UIScollView上方不自动留空白
     }
     return self;
 }

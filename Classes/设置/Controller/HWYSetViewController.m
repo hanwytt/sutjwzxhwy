@@ -206,10 +206,10 @@
     NSArray *toRecipients = [NSArray arrayWithObject: @"hanwytt@163.com"];
     [mailPicker setToRecipients: toRecipients];
     //添加抄送
-    //    NSArray *ccRecipients = [NSArray arrayWithObjects:@"yyydyhanwy@163.com", nil];
+    //    NSArray *ccRecipients = [NSArray arrayWithObjects:@"hanwytt@163.com", nil];
     //    [mailPicker setCcRecipients:ccRecipients];
     //添加密送
-    //    NSArray *bccRecipients = [NSArray arrayWithObjects:@"yyydyhanwy@163.com", nil];
+    //    NSArray *bccRecipients = [NSArray arrayWithObjects:@"hanwytt@163.com", nil];
     //    [mailPicker setBccRecipients:bccRecipients];
     
     //    NSString *emailBody = @"";
