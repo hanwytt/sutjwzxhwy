@@ -83,7 +83,7 @@
     comps = [calendar components:(NSCalendarUnitYear | NSCalendarUnitMonth | NSCalendarUnitDay) fromDate:nowDate];
     NSInteger nowYear = [comps year];
     NSInteger nowMonth = [comps month];
-    NSInteger row = (nowYear - 2008) * 2 - 1;
+    NSInteger row = (nowYear - 2007) * 2 - 1;
     if (nowMonth > 7) {
         row++;
     }

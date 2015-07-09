@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <array>
+	<string>2007-2008学年第一学期</string>
+	<string>2007-2008学年第二学期</string>
 	<string>2008-2009学年第一学期</string>
 	<string>2008-2009学年第二学期</string>
 	<string>2009-2010学年第一学期</string>

@@ -37,7 +37,7 @@
 - (void)initView {
     NSString *yearStr = [_semester substringToIndex:4];//0-4不包括4
     NSInteger year = [yearStr integerValue];
-    year = (year - 2008) * 2;
+    year = (year - 2007) * 2;
     if ([_semester containsString:@"一"]) {
         year++;
     } else {
